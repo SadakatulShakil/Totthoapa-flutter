@@ -35,6 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Provider.of<UserProvider>(context, listen: false).setUser(user);
       prefs.setString('token', user.token.toString());
+      prefs.setString('full_name', user.full_name.toString());
+      prefs.setString('user_image', user.user_image.toString());
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MainScreen()),

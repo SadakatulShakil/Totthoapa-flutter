@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tottho_apa_flutter/Api/auth_service.dart';
 import 'package:tottho_apa_flutter/Screens/incomplete_order_screen.dart';
 import 'package:tottho_apa_flutter/Screens/login_screen.dart';
 import 'package:tottho_apa_flutter/Screens/new_order_screen.dart';
+import 'package:tottho_apa_flutter/Screens/profile_screen.dart';
 import 'package:tottho_apa_flutter/Screens/total_delivery_screen.dart';
 import 'package:tottho_apa_flutter/Screens/total_order_screen.dart';
 import 'dart:math'; // Import the math package for random number generation
 import '../Api/dashBoard_service.dart';
 import '../Providers/dashboard_provider.dart';
+import '../Providers/profile_provider.dart';
 import '../Providers/user_provider.dart';
 import 'all_merchant_screen.dart';
 
@@ -18,7 +21,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  String? name;
   Future<void> _fetchDashboardData(BuildContext context) async {
     try {
       final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
@@ -32,18 +34,35 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future<void> _fetchProfileData(BuildContext context) async {
+    try {
+      final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
+      print("token_context: "+ userToken.toString());
+      final data = await AuthService.profileData(userToken);
+
+      Provider.of<ProfileProvider>(context, listen: false).updateProfileData(data);
+    } catch (e) {
+      // Handle data fetch failure
+      print('Failed to fetch profile data: $e');
+      // Display an error message to the user
+    }
+  }
+
   Future<void> _refreshDashboardData() async {
     await _fetchDashboardData(context);
+    await _fetchProfileData(context);
   }
 
   @override
   void initState() {
     super.initState();
-
     _fetchDashboardData(context); // Fetch dashboard data on screen load
+    _fetchProfileData(context); // Fetch profile data on screen load
   }
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    print("name_context: "+ userProvider.user.full_name.toString());
     return Scaffold(
       appBar: AppBar(
         title: Text('লাল সবুজ'),
@@ -61,7 +80,8 @@ class _MainScreenState extends State<MainScreen> {
 class DrawerContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    print("name: "+ userProvider.user.full_name.toString());
     return Column(
       children: [
         Container(
@@ -90,9 +110,16 @@ class DrawerContent extends StatelessWidget {
             title: Text('Home'),
           ),
         ),
-        ListTile(
-          leading: Icon(Icons.person),
-          title: Text('Profile'),
+        GestureDetector(
+          onTap: (){
+            Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileScreen()));
+          },
+          child: ListTile(
+            leading: Icon(Icons.person),
+            title: Text('Profile'),
+          ),
         ),
         ListTile(
           leading: Icon(Icons.add),

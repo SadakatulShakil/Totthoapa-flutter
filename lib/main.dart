@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tottho_apa_flutter/Providers/district_provider.dart';
+import 'package:tottho_apa_flutter/Providers/upazila_provider.dart';
 import 'Models/user_model.dart';
 import 'Providers/dashboard_provider.dart';
 import 'Providers/merchant_provider.dart';
+import 'Providers/profile_provider.dart';
 import 'Providers/user_provider.dart';
 import 'Screens/main_screen.dart';
 import 'Screens/splash_screen.dart';
@@ -35,6 +38,9 @@ void main() async{
       ChangeNotifierProvider(create: (_) => UserProvider(user)),
       ChangeNotifierProvider(create: (_) => DashboardProvider()),
       ChangeNotifierProvider(create: (_) => MerchantProvider()),
+      ChangeNotifierProvider(create: (_) => ProfileProvider()),
+      ChangeNotifierProvider(create: (_) => DistrictProvider()),
+      ChangeNotifierProvider(create: (_) => UpazilaProvider()),
     ], child: MyApp()),
   );
 }

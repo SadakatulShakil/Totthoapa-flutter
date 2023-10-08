@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tottho_apa_flutter/Screens/merchant_details_screen.dart';
 import '../Models/merchant_model.dart';
 import '../Providers/merchant_provider.dart';
 import '../Providers/user_provider.dart';
@@ -49,38 +50,45 @@ class MerchantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 4, // Apply elevation for a card-like effect
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10), // Apply rounded corners
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'ID: ${merchant.id}',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Name: ${merchant.name}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'Email: ${merchant.email ?? 'N/A'}', // Use null-aware operator
-              style: TextStyle(color: Colors.grey[700]),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'Phone: ${merchant.phone ?? 'N/A'}', // Use null-aware operator
-              style: TextStyle(color: Colors.grey[700]),
-            ),
-            // Add other merchant details...
-          ],
+    return GestureDetector(
+      onTap: (){
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MerchantDetailsScreen(merchant)));
+      },
+      child: Card(
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        elevation: 4, // Apply elevation for a card-like effect
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10), // Apply rounded corners
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ID: ${merchant.id}',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Name: ${merchant.name}',
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Email: ${merchant.email ?? 'N/A'}', // Use null-aware operator
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Phone: ${merchant.phone ?? 'N/A'}', // Use null-aware operator
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+              // Add other merchant details...
+            ],
+          ),
         ),
       ),
     );
