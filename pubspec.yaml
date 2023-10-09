@@ -34,6 +34,7 @@ dependencies:
   provider: ^6.0.1  # for state management
   google_fonts: ^5.1.0 #for google fonts
   marquee: ^2.2.3
+  get: ^4.6.5
   shared_preferences: ^2.0.9
 
 

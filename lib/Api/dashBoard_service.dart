@@ -15,10 +15,11 @@ class DashboardService {
       if (response.statusCode == 200) {
         return json.decode(response.body)['data'];
       } else {
+        print("----->states"+response.statusCode.toString());
         throw Exception('Failed to fetch dashboard data');
       }
     } catch (e) {
-      throw Exception('Failed to connect to the server');
+      throw Exception('Failed to connect to the server'+e.toString());
     }
   }
 }

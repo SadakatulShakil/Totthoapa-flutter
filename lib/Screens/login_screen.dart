@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,34 +19,64 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
 
   Future<void> _login(BuildContext context) async {
+    setState(() {
+      isLoading = true;
+    });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final response = await AuthService.login(phoneController.text, passwordController.text);
+      print(".........."+response['status'].toString());
+      if(response['status'].toString() == 'true'){
+        Get.snackbar(
+          "Success!",
+          "Successfully logged in",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          borderRadius: 10,
+          margin: EdgeInsets.all(10),
+        );
+        final user = User(
+          response['status'],
+          response['token'],
+          response['user_id'],
+          response['user_name'],
+          response['user_image'],
+          response['full_name'],
+          response['first_time_logged'],
+        );
 
-      final user = User(
-        response['status'],
-        response['token'],
-        response['user_id'],
-        response['user_name'],
-        response['user_image'],
-        response['full_name'],
-        response['first_time_logged'],
-      );
+        Provider.of<UserProvider>(context, listen: false).setUser(user);
+        prefs.setString('token', user.token.toString());
+        prefs.setString('full_name', user.full_name.toString());
+        prefs.setString('user_image', user.user_image.toString());
 
-      Provider.of<UserProvider>(context, listen: false).setUser(user);
-      prefs.setString('token', user.token.toString());
-      prefs.setString('full_name', user.full_name.toString());
-      prefs.setString('user_image', user.user_image.toString());
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
-      );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainScreen()),
+        );
+      }else if(response['status'] == 401){
+        Get.snackbar(
+          "Warning!",
+          "Authentication failed. User or password is incorrect",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          borderRadius: 10,
+          margin: EdgeInsets.all(10),
+        );
+      }
     } catch (e) {
       // Handle login failure
       print('Login failed: $e');
       // Display an error message to the user
+    }finally{
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -101,7 +133,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: ElevatedButton.styleFrom(
                         primary: Colors.green,
                       ),
-                      child: Text('Login'),
+                      child: isLoading
+                          ? CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
+                      )
+                          : Text('Login'),
                     ),
                   ),
                 ],

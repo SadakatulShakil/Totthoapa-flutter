@@ -18,8 +18,15 @@ class UpazilaProvider extends ChangeNotifier {
     _upazilas = (data['upazila'] as List)
         .map((json) => Upazila.fromJson(json))
         .toList();
-
     notifyListeners();
   }
 
+  Upazila? _selectedUpazilaObject;
+
+  Upazila? get selectedUpazilaObject => _selectedUpazilaObject;
+
+  void setSelectedUpazilaObject(Upazila upazila) {
+    _selectedUpazilaObject = upazila;
+    notifyListeners();
+  }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tottho_apa_flutter/Api/auth_service.dart';
@@ -24,12 +26,28 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> _fetchDashboardData(BuildContext context) async {
     try {
       final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
+      print("token:=-----> "+ userToken.toString());
       final data = await DashboardService.fetchDashboardData(userToken);
-
+      print("dataStates:=-----> "+ data.toString());
       Provider.of<DashboardProvider>(context, listen: false).updateDashboardData(data);
     } catch (e) {
       // Handle data fetch failure
       print('Failed to fetch dashboard data: $e');
+      Get.snackbar(
+        "Warning!",
+        "Authentication failed. Your session has expired",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        borderRadius: 10,
+        margin: EdgeInsets.all(10),
+      );
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('token', '');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
       // Display an error message to the user
     }
   }
@@ -39,11 +57,25 @@ class _MainScreenState extends State<MainScreen> {
       final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
       print("token_context: "+ userToken.toString());
       final data = await AuthService.profileData(userToken);
-
       Provider.of<ProfileProvider>(context, listen: false).updateProfileData(data);
     } catch (e) {
       // Handle data fetch failure
       print('Failed to fetch profile data: $e');
+      Get.snackbar(
+        "Warning!",
+        "Authentication failed. Your session has expired",
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        borderRadius: 10,
+        margin: EdgeInsets.all(10),
+      );
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('token', '');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
       // Display an error message to the user
     }
   }
