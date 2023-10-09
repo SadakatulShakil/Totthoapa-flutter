@@ -4,6 +4,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tottho_apa_flutter/Api/auth_service.dart';
+import 'package:tottho_apa_flutter/Screens/add_merchant_screen.dart';
 import 'package:tottho_apa_flutter/Screens/incomplete_order_screen.dart';
 import 'package:tottho_apa_flutter/Screens/login_screen.dart';
 import 'package:tottho_apa_flutter/Screens/new_order_screen.dart';
@@ -153,9 +154,16 @@ class DrawerContent extends StatelessWidget {
             title: Text('Profile'),
           ),
         ),
-        ListTile(
-          leading: Icon(Icons.add),
-          title: Text('Add Merchant'),
+        GestureDetector(
+          onTap: (){
+            Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddMerchant()));
+          },
+          child: ListTile(
+            leading: Icon(Icons.add),
+            title: Text('Add Merchant'),
+          ),
         ),
         GestureDetector(
           onTap: (){
