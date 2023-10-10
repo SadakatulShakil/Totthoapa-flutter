@@ -254,16 +254,38 @@ class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dashboardProvider = Provider.of<DashboardProvider>(context);
-    return GridView.count(
-      crossAxisCount: 2,
-      padding: EdgeInsets.all(16),
+
+    return Stack(
       children: [
-        DashboardCard(Icons.star, 'New Order', dashboardProvider.totalPending.toString()),
-        DashboardCard(Icons.person, 'Today delivery', dashboardProvider.totalShipped.toString()),
-        DashboardCard(Icons.shop, 'Total Order', dashboardProvider.totalOrder.toString()),
-        DashboardCard(Icons.shopping_cart, 'Total Order Cost', '৳ '+dashboardProvider.totalOrderPrice.toString()),
-        DashboardCard(Icons.thumb_up, 'Incomplete Order', dashboardProvider.totalProcessing.toString()),
-        DashboardCard(Icons.chat_bubble, 'Total merchant', dashboardProvider.totalMerchant.toString()),
+        // Background Image
+        Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/beck_logo.png'), // Replace with your image asset
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+
+        // White Shading
+        Container(
+          color: Colors.white.withOpacity(0.85), // Adjust opacity as needed
+        ),
+
+        // Content
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          padding: EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 50),
+          children: [
+            DashboardCard(Icons.star, 'New Order', dashboardProvider.totalPending.toString()),
+            DashboardCard(Icons.person, 'Today delivery', dashboardProvider.totalShipped.toString()),
+            DashboardCard(Icons.shop, 'Total Order', dashboardProvider.totalOrder.toString()),
+            DashboardCard(Icons.shopping_cart, 'Total Order Cost', '৳ '+dashboardProvider.totalOrderPrice.toString()),
+            DashboardCard(Icons.thumb_up, 'Incomplete Order', dashboardProvider.totalProcessing.toString()),
+            DashboardCard(Icons.chat_bubble, 'Total merchant', dashboardProvider.totalMerchant.toString()),
+          ],
+        ),
       ],
     );
   }
@@ -299,13 +321,13 @@ class DashboardCard extends StatelessWidget {
             left: 8,
             child: Text(
               name,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
           ),
           Center(
             child: Text(
               'Count: $count',
-              style: TextStyle(fontSize: 12),
+              style: TextStyle(fontSize: 14),
               textAlign: TextAlign.center,
             ),
           ),
