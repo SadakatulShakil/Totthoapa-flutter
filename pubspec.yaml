@@ -35,6 +35,8 @@ dependencies:
   google_fonts: ^5.1.0 #for google fonts
   marquee: ^2.2.3
   get: ^4.6.5
+  geolocator: ^10.0.0
+  image_picker: ^1.0.2
   shared_preferences: ^2.0.9
 
 
