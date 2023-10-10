@@ -82,27 +82,6 @@ class _MainScreenState extends State<MainScreen> {
       // Display an error message to the user
     }
   }
-  late Position _currentPosition;
-  Future<void> _getCurrentLocation() async {
-    final addMerchantProvider = Provider.of<AddMerchantProvider>(context, listen: false);
-    try {
-      final GeolocatorPlatform geolocator = GeolocatorPlatform.instance;
-      bool isLocationServiceEnabled =
-      await geolocator.isLocationServiceEnabled();
-      if (isLocationServiceEnabled) {
-        LocationPermission permission = await geolocator.requestPermission();
-        if (permission == LocationPermission.always ||
-            permission == LocationPermission.whileInUse) {
-          _currentPosition = await geolocator.getCurrentPosition();
-
-          addMerchantProvider.latitude =
-              _currentPosition.latitude.toString();
-          addMerchantProvider.longitude =
-              _currentPosition.longitude.toString();
-        } else {}
-      } else {}
-    } catch (e) {}
-  }
 
   Future<void> _refreshDashboardData() async {
     await _fetchDashboardData(context);
@@ -114,7 +93,6 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _fetchDashboardData(context); // Fetch dashboard data on screen load
     _fetchProfileData(context); // Fetch profile data on screen load
-    _getCurrentLocation();
   }
   @override
   Widget build(BuildContext context) {

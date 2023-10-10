@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tottho_apa_flutter/Providers/add_merchant_provider.dart';
@@ -15,6 +16,7 @@ import 'Screens/splash_screen.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  await _requestLocationPermission();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token') ?? '';
   String status = prefs.getString('status') ?? '';
@@ -46,6 +48,15 @@ void main() async{
       ChangeNotifierProvider(create: (_) => AddMerchantProvider()),
     ], child: MyApp()),
   );
+}
+
+Future<void> _requestLocationPermission() async {
+  final PermissionStatus status = await Permission.location.request();
+  if (status == PermissionStatus.granted) {
+    print('Location permission granted');
+  } else {
+    print('Location permission denied');
+  }
 }
 
 class MyApp extends StatelessWidget {

@@ -1,6 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Providers/add_merchant_provider.dart';
 
@@ -32,10 +36,87 @@ class _AddMerchantState extends State<AddMerchant> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
+  Future<void> _checkLocationPermission() async {
+    var status = await Permission.location.status;
+    if (status == PermissionStatus.granted) {
+      _getCurrentLocation();
+    } else if (status == PermissionStatus.denied) {
+      _showLocationPermissionDeniedDialog();
+    } else if (status == PermissionStatus.permanentlyDenied) {
+      _showLocationPermissionPermanentlyDeniedDialog();
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    print('calling location');
+    final addMerchantProvider = Provider.of<AddMerchantProvider>(context, listen: false);
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      setState(() {
+        print('calling location:'+position.latitude.toString()+"..."+position.longitude.toString());
+        addMerchantProvider.latitude = position.latitude.toString();
+        addMerchantProvider.longitude = position.longitude.toString();
+      });
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  void _showLocationPermissionDeniedDialog() {
+    // You can show a dialog to inform the user and ask them to enable permissions
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Location Permission Denied"),
+          content: Text("Please enable location permissions to use this feature."),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLocationPermissionPermanentlyDeniedDialog() {
+    // You can show a dialog to inform the user and guide them to app settings
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Location Permission Permanently Denied"),
+          content: Text("Please enable location permissions in app settings."),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                openAppSettings();
+              },
+              child: Text("Open Settings"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     final addMerchantProvider = Provider.of<AddMerchantProvider>(context, listen: false);
+    _checkLocationPermission();
     storeNameController.text = addMerchantProvider.shopName;
     merchantNameController.text = addMerchantProvider.firstName;
     phoneNo1Controller.text = addMerchantProvider.primaryPhoneNumber;
@@ -88,14 +169,14 @@ class _AddMerchantState extends State<AddMerchant> {
                 ),
                 SizedBox(height: 16.0),
                 buildRequiredLabel('Store Name*', true),
-                buildTextField(storeNameController, onChanged: addMerchantProvider.updateShopName),
+                buildTextField(storeNameController, onChanged: addMerchantProvider.updateShopName, isRequired: true),
                 SizedBox(height: 8.0),
                 buildRequiredLabel('Merchant Name*', true),
-                buildTextField(merchantNameController, onChanged: addMerchantProvider.updateFirstName),
+                buildTextField(merchantNameController, onChanged: addMerchantProvider.updateFirstName, isRequired: true),
                 SizedBox(height: 8.0),
                 buildRequiredLabel('Phone No 1*', true),
                 buildTextField(phoneNo1Controller,
-                    keyboardType: TextInputType.phone, onChanged: addMerchantProvider.updatePrimaryPhoneNumber),
+                    keyboardType: TextInputType.phone, onChanged: addMerchantProvider.updatePrimaryPhoneNumber, isRequired: true),
                 SizedBox(height: 8.0),
                 buildRequiredLabel('Phone No 2', false),
                 buildTextField(phoneNo2Controller,
@@ -198,6 +279,9 @@ class _AddMerchantState extends State<AddMerchant> {
                                       addMerchantProvider.paymentMethod == 'bank',
                                       onChanged: (value) {
                                     setState(() {
+                                      addMerchantProvider.updateAccountName('');
+                                      addMerchantProvider.updateAccountNumber('');
+                                      addMerchantProvider.updateBankName('');
                                       addMerchantProvider.updatePaymentMethod('bank');
                                     });
                                   }),
@@ -205,6 +289,9 @@ class _AddMerchantState extends State<AddMerchant> {
                                       addMerchantProvider.paymentMethod == 'mobilebank',
                                       onChanged: (value) {
                                     setState(() {
+                                      addMerchantProvider.updateAccountName('');
+                                      addMerchantProvider.updateAccountNumber('');
+                                      addMerchantProvider.updateBankName('');
                                       addMerchantProvider.updatePaymentMethod('mobilebank');
                                     });
                                   }),
@@ -258,13 +345,13 @@ class _AddMerchantState extends State<AddMerchant> {
                 ),
                 SizedBox(height: 16.0),
                 buildRequiredLabel('Address*', true),
-                buildTextField(userAddressController, onChanged: addMerchantProvider.updateUserAddress),
+                buildTextField(userAddressController, onChanged: addMerchantProvider.updateUserAddress, isRequired: true),
                 SizedBox(height: 8.0),
                 buildRequiredLabel('Password*', true),
-                buildTextField(passwordController, onChanged: addMerchantProvider.updateUserPassword),
+                buildTextField(passwordController, onChanged: addMerchantProvider.updateUserPassword, isRequired: true),
                 SizedBox(height: 8.0),
                 buildRequiredLabel('Confirm Password*', true),
-                buildTextField(confirmPasswordController,onChanged: addMerchantProvider.updateUserCPassword),
+                buildTextField(confirmPasswordController,onChanged: addMerchantProvider.updateUserCPassword, isRequired: true),
                 SizedBox(height: 16.0),
                 Padding(
                   padding: const EdgeInsets.only(left: 12.0, right: 12),
@@ -272,35 +359,138 @@ class _AddMerchantState extends State<AddMerchant> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async{
-                        // Perform login logic
-                        //_login(context);
-                        print('data: '+
-                            addMerchantProvider.latitude+"--"+
-                            addMerchantProvider.longitude+"--"+
-                            addMerchantProvider.firstName+"--"+
-                            addMerchantProvider.primaryPhoneNumber+"--"+
-                            addMerchantProvider.secondPhoneNumber+"--"+
-                            addMerchantProvider.nidNumber+"--"+
-                            addMerchantProvider.emailAddress+"--"+
-                            addMerchantProvider.userPassword+"--"+
-                            addMerchantProvider.userCPassword+"--"+
-                            addMerchantProvider.shopName+"--"+
-                            addMerchantProvider.userAddress+"--"+
-                            selectedImagePathForReporting+"--"+
-                            addMerchantProvider.districtId+"--"+
-                            addMerchantProvider.upazilaId+"--"+
-                            addMerchantProvider.accountName+"--"+
-                            addMerchantProvider.bankName+"--"+
-                            addMerchantProvider.paymentMethod+"--"+
-                            addMerchantProvider.accountNumber+"--"+
-                            addMerchantProvider.memberOfJoita+"--"+
-                            addMerchantProvider.trainingOfFmsName+"--"+
-                            addMerchantProvider.isTrainedOfFms+" --->end"
+                        ///demo check
 
-                        );
-                        await addMerchantProvider.clearAllDataFields();
-                        setState(() {
-                        });
+                        // print('data: '+
+                        //     addMerchantProvider.latitude+"--"+
+                        //     addMerchantProvider.longitude+"--"+
+                        //     addMerchantProvider.firstName+"--"+
+                        //     addMerchantProvider.primaryPhoneNumber+"--"+
+                        //     addMerchantProvider.secondPhoneNumber+"--"+
+                        //     addMerchantProvider.nidNumber+"--"+
+                        //     addMerchantProvider.emailAddress+"--"+
+                        //     addMerchantProvider.userPassword+"--"+
+                        //     addMerchantProvider.userCPassword+"--"+
+                        //     addMerchantProvider.shopName+"--"+
+                        //     addMerchantProvider.userAddress+"--"+
+                        //     selectedImagePathForReporting+"--"+
+                        //     addMerchantProvider.districtId+"--"+
+                        //     addMerchantProvider.upazilaId+"--"+
+                        //     addMerchantProvider.accountName+"--"+
+                        //     addMerchantProvider.bankName+"--"+
+                        //     addMerchantProvider.paymentMethod+"--"+
+                        //     addMerchantProvider.accountNumber+"--"+
+                        //     addMerchantProvider.memberOfJoita+"--"+
+                        //     addMerchantProvider.trainingOfFmsName+"--"+
+                        //     addMerchantProvider.isTrainedOfFms+" --->end"
+                        // );
+
+                        ///Actual logic
+
+                        if(isMerchantPaymentEnabled){
+                          if(addMerchantProvider.paymentMethod==''){
+                            Get.snackbar(
+                              "Validation Error!",
+                              "One Payment method is required.",
+                              snackPosition: SnackPosition.TOP,
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                              borderRadius: 10,
+                              margin: EdgeInsets.all(10),
+                            );
+                          }
+                          if(addMerchantProvider.paymentMethod !=''){
+                            if(addMerchantProvider.accountName == ''){
+                              Get.snackbar(
+                                "Validation Error!",
+                                "Account holder name is required.",
+                                snackPosition: SnackPosition.TOP,
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                                borderRadius: 10,
+                                margin: EdgeInsets.all(10),
+                              );
+                            }else if(addMerchantProvider.bankName == ''){
+                              Get.snackbar(
+                                "Validation Error!",
+                                "Bank name is required.",
+                                snackPosition: SnackPosition.TOP,
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                                borderRadius: 10,
+                                margin: EdgeInsets.all(10),
+                              );
+                            }else if(addMerchantProvider.accountNumber == ''){
+                              Get.snackbar(
+                                "Validation Error!",
+                                "Account number is required.",
+                                snackPosition: SnackPosition.TOP,
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                                borderRadius: 10,
+                                margin: EdgeInsets.all(10),
+                              );
+                            }
+                          }
+                        }
+                         else if(addMerchantProvider.isTrainedOfFms == '1'){
+                          print("--------? "+addMerchantProvider.trainingOfFmsName);
+                          if(addMerchantProvider.trainingOfFmsName == ''){
+                            {
+                              Get.snackbar(
+                                "Validation Error!",
+                                "Training name is required.",
+                                snackPosition: SnackPosition.TOP,
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                                borderRadius: 10,
+                                margin: EdgeInsets.all(10),
+                              );
+                            }
+                          }
+                        }
+                          if (_formKey.currentState!.validate()) {
+                            // The form is valid, perform your actions here
+                            print('data: '+
+                                addMerchantProvider.latitude+"--"+
+                                addMerchantProvider.longitude+"--"+
+                                addMerchantProvider.firstName+"--"+
+                                addMerchantProvider.primaryPhoneNumber+"--"+
+                                addMerchantProvider.secondPhoneNumber+"--"+
+                                addMerchantProvider.nidNumber+"--"+
+                                addMerchantProvider.emailAddress+"--"+
+                                addMerchantProvider.userPassword+"--"+
+                                addMerchantProvider.userCPassword+"--"+
+                                addMerchantProvider.shopName+"--"+
+                                addMerchantProvider.userAddress+"--"+
+                                selectedImagePathForReporting+"--"+
+                                addMerchantProvider.districtId+"--"+
+                                addMerchantProvider.upazilaId+"--"+
+                                addMerchantProvider.accountName+"--"+
+                                addMerchantProvider.bankName+"--"+
+                                addMerchantProvider.paymentMethod+"--"+
+                                addMerchantProvider.accountNumber+"--"+
+                                addMerchantProvider.memberOfJoita+"--"+
+                                addMerchantProvider.trainingOfFmsName+"--"+
+                                addMerchantProvider.isTrainedOfFms+" --->end"
+
+                            );
+                            await addMerchantProvider.clearAllDataFields();
+                            setState(() {
+                              storeNameController.text ='';
+                              merchantNameController.text ='';
+                              phoneNo1Controller.text ='';
+                              phoneNo2Controller.text ='';
+                              emailController.text ='';
+                              nidController.text ='';
+                              userAddressController.text ='';
+                              passwordController.text ='';
+                              confirmPasswordController.text ='';
+                              accountHolderNameController.text ='';
+                              accountNoController.text ='';
+                              isMerchantPaymentEnabled = false;
+                            });
+                          }
                       },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.green,
@@ -324,14 +514,21 @@ class _AddMerchantState extends State<AddMerchant> {
   }
 
   Widget buildTextField(TextEditingController controller,
-      {TextInputType keyboardType = TextInputType.text, required void Function(String value) onChanged}) {
-    return TextField(
+      {TextInputType keyboardType = TextInputType.text,
+        required void Function(String value) onChanged, bool isRequired = false}) {
+    return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: 'Enter value',
       ),
+      validator: (value) {
+        if (isRequired && (value == null || value.isEmpty)) {
+          return 'This field is required';
+        }
+        return null; // Return null if the validation is successful
+      },
     );
   }
 
