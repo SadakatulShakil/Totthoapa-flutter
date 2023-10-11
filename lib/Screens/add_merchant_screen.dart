@@ -8,6 +8,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Providers/add_merchant_provider.dart';
 
+import '../Providers/user_provider.dart';
+
 class AddMerchant extends StatefulWidget {
   @override
   _AddMerchantState createState() => _AddMerchantState();
@@ -451,6 +453,8 @@ class _AddMerchantState extends State<AddMerchant> {
                         }
                           if (_formKey.currentState!.validate()) {
                             // The form is valid, perform your actions here
+                            final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
+                            await addMerchantProvider.sendMerchantDataToServer(context, userToken);
                             print('data: '+
                                 addMerchantProvider.latitude+"--"+
                                 addMerchantProvider.longitude+"--"+

@@ -23,8 +23,8 @@ class AddMerchantProvider extends ChangeNotifier {
   String _shopName = '';
   String _userAddress = '';
   String _profileImage = '';
-  String _districtId = '';
-  String _upazilaId = '';
+  String _districtId = '56';
+  String _upazilaId = '425';
   String _paymentMethod = '';
   String _accountName = '';
   String _bankName = '';
@@ -192,7 +192,7 @@ class AddMerchantProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> sendMerchantDataToServer(String token) async {
+  Future<dynamic> sendMerchantDataToServer(BuildContext context, String token) async {
     final String baseUrl = 'https://laalsobuj.comjagat.org/api/totthoapa';
     final String addMerchantUrl = '$baseUrl/addmerchant';
     try{
@@ -215,7 +215,6 @@ class AddMerchantProvider extends ChangeNotifier {
         'password': _userPassword,
         'shop_name': _shopName,
         'user_address': _userAddress,
-        'profile_image': _profileImage,
         'latitude': latitude,
         'longitude': longitude,
         'district': _districtId,
@@ -231,10 +230,13 @@ class AddMerchantProvider extends ChangeNotifier {
       imageUploadRequest.fields.addAll(jsonBody);
 
       // Attach the image file
-      imageUploadRequest.files.add(await http.MultipartFile.fromPath(
-        'image',
-        _profileImage,
-      ));
+      if (_profileImage.isNotEmpty) {
+        // Attach the image file if it's provided
+        imageUploadRequest.files.add(await http.MultipartFile.fromPath(
+          'profile_image',
+          _profileImage,
+        ));
+      }
       final streamedResponse = await imageUploadRequest.send();
       final response = await http.Response.fromStream(streamedResponse);
 
@@ -242,7 +244,7 @@ class AddMerchantProvider extends ChangeNotifier {
         print('Response body234: ${response.body}');
         Get.snackbar(
           "Success!",
-          "Photo Uploaded.",
+          "Merchant add successfully.",
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -262,9 +264,30 @@ class AddMerchantProvider extends ChangeNotifier {
           borderRadius: 10,
           margin: EdgeInsets.all(10),
         );
-      }else{
+      }else if(response.statusCode == 403){
+        try {
+          final List<dynamic> errors = json.decode(response.body)['errors'];
+          final List<dynamic> errorMessages = errors.map((error) => error['message']).toList();
+
+          if (errorMessages.isNotEmpty) {
+            // Show a Snackbar with the error messages
+            for(var message in errorMessages){
+              Get.snackbar(
+                "Error!",
+                message,
+                snackPosition: SnackPosition.TOP,
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+                borderRadius: 10,
+                margin: EdgeInsets.all(10),
+              );
+            }
+          }
+        } catch (e) {
+          print('Error parsing API response: $e');
+        }
         print('Response body234: ${response.body}');
-        print('Response code234 : ${response.body}');
+        print('Response code234 : ${response.statusCode}');
       }
     }catch (e){
       throw Exception('Failed to connect to the server: $e');

@@ -31,8 +31,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   Future<void> _updateProfile(BuildContext context) async {
     final profileProvider =  Provider.of<ProfileProvider>(context, listen: false);
     try {
-      final userToken =
-          Provider.of<UserProvider>(context, listen: false).user.token;
+      final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
       print("token_context: " + userToken.toString());
       final data = await AuthService.updateProfileData(
           userToken,
