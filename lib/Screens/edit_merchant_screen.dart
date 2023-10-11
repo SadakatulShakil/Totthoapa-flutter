@@ -9,18 +9,21 @@ import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Providers/crud_merchant_provider.dart';
 
 import '../Models/add_merchant_model.dart';
+import '../Models/district_model.dart';
+import '../Models/merchant_model.dart';
+import '../Models/upazila_model.dart';
+import '../Providers/district_provider.dart';
+import '../Providers/upazila_provider.dart';
 import '../Providers/user_provider.dart';
+import 'all_merchant_screen.dart';
+import 'merchant_details_screen.dart';
 
-class AddMerchant extends StatefulWidget {
-  String from;
-  merchantDataModel userData;
-  AddMerchant(this.from, this.userData);
-
+class EditMerchantScreen extends StatefulWidget {
   @override
-  _AddMerchantState createState() => _AddMerchantState();
+  _EditMerchantScreenState createState() => _EditMerchantScreenState();
 }
 
-class _AddMerchantState extends State<AddMerchant> {
+class _EditMerchantScreenState extends State<EditMerchantScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController storeNameController = TextEditingController();
   TextEditingController merchantNameController = TextEditingController();
@@ -33,7 +36,6 @@ class _AddMerchantState extends State<AddMerchant> {
   bool isLoading = false;
   bool isMemberOfJoyeta = false;
   bool isTakingTraining = false;
-  bool isMerchantPaymentEnabled = false;
 
   String selectedPaymentMethod = '';
   TextEditingController accountHolderNameController = TextEditingController();
@@ -122,20 +124,39 @@ class _AddMerchantState extends State<AddMerchant> {
   @override
   void initState() {
     super.initState();
-    final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
-    _checkLocationPermission();
-    storeNameController.text = addMerchantProvider.shopName;
-    merchantNameController.text = addMerchantProvider.firstName;
-    phoneNo1Controller.text = addMerchantProvider.primaryPhoneNumber;
-    phoneNo2Controller.text = addMerchantProvider.secondPhoneNumber;
-    emailController.text = addMerchantProvider.emailAddress;
-    nidController.text = addMerchantProvider.nidNumber;
-    accountHolderNameController.text = addMerchantProvider.accountName;
-    bankNameController.text = addMerchantProvider.bankName;
-    accountNoController.text = addMerchantProvider.accountNumber;
-    userAddressController.text = addMerchantProvider.userAddress;
-    passwordController.text = addMerchantProvider.userPassword;
-    confirmPasswordController.text = addMerchantProvider.userCPassword;
+   Future.delayed(Duration.zero,(){
+     final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
+     _checkLocationPermission();
+     storeNameController.text = addMerchantProvider.shopName;
+     merchantNameController.text = addMerchantProvider.firstName;
+     phoneNo1Controller.text = addMerchantProvider.primaryPhoneNumber;
+     phoneNo2Controller.text = addMerchantProvider.secondPhoneNumber;
+     emailController.text = addMerchantProvider.emailAddress;
+     nidController.text = addMerchantProvider.nidNumber;
+     accountHolderNameController.text = addMerchantProvider.accountName;
+     bankNameController.text = addMerchantProvider.bankName;
+     accountNoController.text = addMerchantProvider.accountNumber;
+     userAddressController.text = addMerchantProvider.userAddress;
+     passwordController.text = addMerchantProvider.userPassword;
+     confirmPasswordController.text = addMerchantProvider.userCPassword;
+
+     Future.delayed(Duration.zero, ()async{
+       addMerchantProvider.setDistrictId(addMerchantProvider.districtId.toString());
+
+       await context.read<UpazilaProvider>().fetchUpazilas(int.tryParse(addMerchantProvider.districtId.toString())??-1);
+       // Delayed execution to ensure the district dropdown is populated before setting the upazila
+       Future.delayed(Duration(milliseconds: 500), () {
+         // Get the Upazila object from the list using the selectedUpazilaId
+         Upazila selectedUpazila = context.read<UpazilaProvider>().upazilas.firstWhere(
+               (upazila) => upazila.id.toString() == (addMerchantProvider.upazilaId.toString()),
+           orElse: () => Upazila(id: -1, district: 56, upazila: 'N/A'), // Default to a placeholder if not found
+         );
+
+         addMerchantProvider.setUpazilaId(selectedUpazila.id.toString());
+         context.read<UpazilaProvider>().setSelectedUpazilaObject(selectedUpazila);
+       });
+     });
+   });
   }
 
   @override
@@ -143,7 +164,7 @@ class _AddMerchantState extends State<AddMerchant> {
     final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Merchant'),
+        title: Text('Update Merchant'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -195,6 +216,94 @@ class _AddMerchantState extends State<AddMerchant> {
                 SizedBox(height: 8.0),
                 buildRequiredLabel('NID', false),
                 buildTextField(nidController, keyboardType: TextInputType.number, onChanged: addMerchantProvider.updateNidNumber),
+                SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0, right: 15),
+                  child: Container(
+                    child:
+                    Row(
+                        children: [
+                          Expanded(child:
+                          Text('Select district', style: TextStyle(color: Colors.black45),),
+                          ),
+                          SizedBox(width: 10,),
+                          Expanded(
+                            child:
+                            Text('Select upazila', style: TextStyle(color: Colors.black45)),
+                          ),
+                        ]),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0, right: 15),
+                  child: Container(
+                    child:
+                    Row(
+                        children: [
+                          Expanded(child:
+                          Consumer<DistrictProvider>(
+                            builder: (context, districtProvider, _) {
+                              // Set the initially selected district
+                              String selectedDistrict = addMerchantProvider.district_Id ?? districtProvider.districts.first.id.toString();
+                              return DropdownButton<String>(
+                                value: selectedDistrict,
+                                onChanged: (value) {
+                                  setState(() {
+                                    Future.delayed(Duration.zero, ()async{
+                                      print("test click: "+value.toString());
+                                      final selectedDistrict = districtProvider.districts.firstWhere((district) => district.id.toString() == value);
+                                      addMerchantProvider.updateDistrictName(selectedDistrict.district??'');
+                                      addMerchantProvider.setDistrictId(value.toString());// value set
+                                      await context.read<UpazilaProvider>().fetchUpazilas(int.tryParse(value ?? '1')??1);
+                                      addMerchantProvider.setUpazilaId(context.read<UpazilaProvider>().upazilas.first.id.toString());
+                                      //context.read<UpazilaProvider>().upazilas.first.id.toString();
+                                    });
+                                  });
+                                },
+                                hint: Text('Select District'),
+                                items: [
+                                  ...districtProvider.districts.map((District district) {
+                                    return DropdownMenuItem<String>(
+                                      value: district.id.toString(),
+                                      child: Text(district.district),
+                                    );
+                                  }),
+                                ],
+                              );
+                            },
+                          ),
+                          ),
+                          SizedBox(width: 10,),
+                          Expanded(
+                            child: Consumer<UpazilaProvider>(
+                              builder: (context, upazilaProvider, _) {
+                                return DropdownButton<String>(
+                                  value: addMerchantProvider.upazila_Id,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      final selectedUpazila = upazilaProvider.upazilas.firstWhere((upazila) => upazila.id.toString() == value);
+                                      addMerchantProvider.updateUpazilaName(selectedUpazila.upazila);
+                                      addMerchantProvider.setUpazilaId(value.toString());
+                                    });
+                                  },
+                                  hint: Text('Select Upazila'),
+                                  items: [
+                                    ...upazilaProvider.upazilas.map((Upazila upazila) {
+                                      return DropdownMenuItem<String>(
+                                        value: upazila.id.toString(),
+                                        child: Text(upazila.upazila),
+                                      );
+                                    }),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+
+
+                        ]),
+                  ),
+                ),
                 SizedBox(height: 16.0),
                 buildRequiredLabel('Are you a member of Joyeta?', false),
                 Row(
@@ -263,10 +372,10 @@ class _AddMerchantState extends State<AddMerchant> {
                     child: Column(
                       children: [
                         buildSwitch(
-                            'Merchant Payment Way', isMerchantPaymentEnabled,
+                            'Merchant Payment Way', addMerchantProvider.isMerchantPaymentEnabled,
                             onChanged: (value) {
                           setState(() {
-                            isMerchantPaymentEnabled = value!;
+                            addMerchantProvider.isMerchantPaymentEnabled = value!;
                             // Reset the selected payment method and clear the corresponding text fields
                             addMerchantProvider.updatePaymentMethod('');
                             addMerchantProvider.updateAccountName('');
@@ -274,7 +383,7 @@ class _AddMerchantState extends State<AddMerchant> {
                             addMerchantProvider.updateBankName('');
                           });
                         }),
-                        if (isMerchantPaymentEnabled)
+                        if (addMerchantProvider.isMerchantPaymentEnabled)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -354,11 +463,11 @@ class _AddMerchantState extends State<AddMerchant> {
                 buildRequiredLabel('Address*', true),
                 buildTextField(userAddressController, onChanged: addMerchantProvider.updateUserAddress, isRequired: true),
                 SizedBox(height: 8.0),
-                buildRequiredLabel('Password*', true),
-                buildTextField(passwordController, onChanged: addMerchantProvider.updateUserPassword, isRequired: true),
+                buildRequiredLabel('Password', false),
+                buildTextField(passwordController, onChanged: addMerchantProvider.updateUserPassword, isRequired: false),
                 SizedBox(height: 8.0),
-                buildRequiredLabel('Confirm Password*', true),
-                buildTextField(confirmPasswordController,onChanged: addMerchantProvider.updateUserCPassword, isRequired: true),
+                buildRequiredLabel('Confirm Password', false),
+                buildTextField(confirmPasswordController,onChanged: addMerchantProvider.updateUserCPassword, isRequired: false),
                 SizedBox(height: 16.0),
                 Padding(
                   padding: const EdgeInsets.only(left: 12.0, right: 12),
@@ -367,7 +476,7 @@ class _AddMerchantState extends State<AddMerchant> {
                     child: ElevatedButton(
                       onPressed: () async{
                         ///demo check
-
+                        print('ccccccccccc: '+addMerchantProvider.isMerchantPaymentEnabled.toString());
                         // print('data: '+
                         //     addMerchantProvider.latitude+"--"+
                         //     addMerchantProvider.longitude+"--"+
@@ -394,7 +503,7 @@ class _AddMerchantState extends State<AddMerchant> {
 
                         ///Actual logic
 
-                        if(isMerchantPaymentEnabled){
+                        if(addMerchantProvider.isMerchantPaymentEnabled){
                           if(addMerchantProvider.paymentMethod==''){
                             Get.snackbar(
                               "Validation Error!",
@@ -459,7 +568,8 @@ class _AddMerchantState extends State<AddMerchant> {
                           if (_formKey.currentState!.validate()) {
                             // The form is valid, perform your actions here
                             final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
-                            await addMerchantProvider.sendMerchantDataToServer(context, userToken);
+                            print('........: '+ addMerchantProvider.id+"------+++-----"+userToken);
+                            await addMerchantProvider.updateMerchantDataToServer(context, userToken, addMerchantProvider.id);
                             print('data: '+
                                 addMerchantProvider.latitude+"--"+
                                 addMerchantProvider.longitude+"--"+
@@ -497,8 +607,11 @@ class _AddMerchantState extends State<AddMerchant> {
                               confirmPasswordController.text ='';
                               accountHolderNameController.text ='';
                               accountNoController.text ='';
-                              isMerchantPaymentEnabled = false;
+                              addMerchantProvider.isMerchantPaymentEnabled = false;
                             });
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => AllMerchantScreen()));
                           }
                       },
                       style: ElevatedButton.styleFrom(
@@ -510,7 +623,7 @@ class _AddMerchantState extends State<AddMerchant> {
                                 Colors.white,
                               ),
                             )
-                          : Text('Submit'),
+                          : Text('Update'),
                     ),
                   ),
                 ),

@@ -13,6 +13,7 @@ class Merchant {
   final String? upazilaName;
   final String? phone;
   final String? phone2;
+  final String? nid;
   final String? profileImage;
   final String? password;
   final String? longitude;
@@ -40,6 +41,7 @@ class Merchant {
     this.upazilaName,
     this.phone,
     this.phone2,
+    this.nid,
     this.profileImage,
     this.password,
     this.longitude,
@@ -69,6 +71,7 @@ class Merchant {
       upazilaName: json['upazila_name'],
       phone: json['phone'],
       phone2: json['phone2'],
+      nid: json['nid'],
       profileImage: json['profile_image'],
       password: json['password'],
       longitude: json['longitude'],

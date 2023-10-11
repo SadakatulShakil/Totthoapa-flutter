@@ -25,6 +25,13 @@ class _AllMerchantScreenState extends State<AllMerchantScreen> {
       body: Consumer<MerchantProvider>(
         builder: (ctx, merchantData, child) {
           final List<Merchant> merchants = merchantData.merchants;
+          if (merchants.isEmpty) {
+            return Center(child: CircularProgressIndicator());
+          }
+          // Sort the list of merchants by the 'modified' field in descending order
+          merchants.sort((a, b) =>
+              DateTime.parse(b.modified ?? '2023-10-11 15:29:22')
+                  .compareTo(DateTime.parse(a.modified ?? '2023-10-11 15:29:22')));
 
           if (merchants.isEmpty) {
             return Center(child: Text('No merchants available.'));
@@ -42,6 +49,7 @@ class _AllMerchantScreenState extends State<AllMerchantScreen> {
     );
   }
 }
+
 
 class MerchantCard extends StatelessWidget {
   final Merchant merchant;

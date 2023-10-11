@@ -5,7 +5,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tottho_apa_flutter/Api/auth_service.dart';
-import 'package:tottho_apa_flutter/Providers/add_merchant_provider.dart';
+import 'package:tottho_apa_flutter/Providers/crud_merchant_provider.dart';
 import 'package:tottho_apa_flutter/Screens/add_merchant_screen.dart';
 import 'package:tottho_apa_flutter/Screens/incomplete_order_screen.dart';
 import 'package:tottho_apa_flutter/Screens/login_screen.dart';
@@ -15,6 +15,7 @@ import 'package:tottho_apa_flutter/Screens/total_delivery_screen.dart';
 import 'package:tottho_apa_flutter/Screens/total_order_screen.dart';
 import 'dart:math'; // Import the math package for random number generation
 import '../Api/dashBoard_service.dart';
+import '../Models/add_merchant_model.dart';
 import '../Providers/dashboard_provider.dart';
 import '../Providers/profile_provider.dart';
 import '../Providers/user_provider.dart';
@@ -26,6 +27,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  merchantDataModel userData = merchantDataModel.nullConstructor();
   Future<void> _fetchDashboardData(BuildContext context) async {
     try {
       final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
@@ -103,7 +105,7 @@ class _MainScreenState extends State<MainScreen> {
         title: Text('লাল সবুজ'),
       ),
       drawer: Drawer(
-        child: DrawerContent(),
+        child: DrawerContent(userData),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshDashboardData,
@@ -113,6 +115,9 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 class DrawerContent extends StatelessWidget {
+  merchantDataModel userData;
+  DrawerContent(this.userData);
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -160,7 +165,7 @@ class DrawerContent extends StatelessWidget {
           onTap: (){
             Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AddMerchant()));
+                MaterialPageRoute(builder: (context) => AddMerchant('add', userData)));
           },
           child: ListTile(
             leading: Icon(Icons.add),

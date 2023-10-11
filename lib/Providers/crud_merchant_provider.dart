@@ -7,13 +7,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import '../Models/district_model.dart';
+import '../Screens/login_screen.dart';
 
-class AddMerchantProvider extends ChangeNotifier {
+class CrudMerchantProvider extends ChangeNotifier {
   //field initialized
   bool isFormModified = false;
+  bool isMerchantPaymentEnabled = false;
   String latitude = '';
   String longitude = '';
+  String _id = '';
   String _firstName = '';
+  String _upazilaName = '';
+  String _districtName = '';
   String _primaryPhoneNumber = '';
   String _secondPhoneNumber = '';
   String _nidNumber = '';
@@ -38,6 +43,14 @@ class AddMerchantProvider extends ChangeNotifier {
   void setDataModified(bool modified) {
     isFormModified = modified;
     notifyListeners(); // Notify listeners when the modification status changes
+  }
+
+  String get id => _id;
+
+  void updateUserId(String value) {
+    _id = value;
+    isFormModified = true;
+    notifyListeners();
   }
 
   String get firstName => _firstName;
@@ -120,6 +133,22 @@ class AddMerchantProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  String get districtName => _districtName;
+
+  void updateDistrictName(String value) {
+    _districtName = value;
+    isFormModified = true;
+    notifyListeners();
+  }
+
+  String get upazilaName => _upazilaName;
+
+  void updateUpazilaName(String value) {
+    _upazilaName = value;
+    isFormModified = true;
+    notifyListeners();
+  }
+
   String get districtId => _districtId;
 
   void updateDistrictId(String value) {
@@ -189,6 +218,19 @@ class AddMerchantProvider extends ChangeNotifier {
   void updateTrainingOfFmsName(String value) {
     _trainingOfFmsName = value;
     isFormModified = true;
+    notifyListeners();
+  }
+
+
+  String? get district_Id => _districtId;
+  String? get upazila_Id => _upazilaId;
+  void setDistrictId (String? setValue){
+    _districtId = setValue??'0';
+    notifyListeners();
+  }
+
+  void setUpazilaId (String? setValue){
+    _upazilaId = setValue??'0';
     notifyListeners();
   }
 
@@ -288,6 +330,140 @@ class AddMerchantProvider extends ChangeNotifier {
         }
         print('Response body234: ${response.body}');
         print('Response code234 : ${response.statusCode}');
+      }else if(response.statusCode == 401){
+        Get.snackbar(
+          "Warning!",
+          "Authentication failed. please login again!",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          borderRadius: 10,
+          margin: EdgeInsets.all(10),
+        );
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', '');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      }
+    }catch (e){
+      throw Exception('Failed to connect to the server: $e');
+    }
+  }
+
+  Future<dynamic> updateMerchantDataToServer(BuildContext context, String token, String id) async {
+    final String baseUrl = 'https://laalsobuj.comjagat.org/api/totthoapa';
+    final String addMerchantUrl = '$baseUrl/editmerchant?id=$id';
+    try{
+      final imageUploadRequest = http.MultipartRequest(
+        'POST',
+        Uri.parse(addMerchantUrl),
+      );
+      // Add headers
+      imageUploadRequest.headers['Authorization'] =
+      'Bearer $token';
+      imageUploadRequest.headers['Content-Type'] =
+      'multipart/form-data';
+
+      final Map<String, String> jsonBody = {
+        'first_name': _firstName,
+        'phone_no': _primaryPhoneNumber,
+        'phone_one': _secondPhoneNumber,
+        'nid': _nidNumber,
+        'email': _emailAddress,
+        'password': _userPassword,
+        'shop_name': _shopName,
+        'user_address': _userAddress,
+        'latitude': latitude,
+        'longitude': longitude,
+        'district': _districtId,
+        'upazila': _upazilaId,
+        'payment_method': _paymentMethod,
+        'account_name': _accountName,
+        'bank_name': _bankName,
+        'account_number': _accountNumber,
+        'memberofjoita': _memberOfJoita,
+        'istraineeofms': _isTrainedOfFms,
+        'trainingofms': _trainingOfFmsName,
+      };
+      imageUploadRequest.fields.addAll(jsonBody);
+
+      // Attach the image file
+      if (_profileImage.isNotEmpty) {
+        // Attach the image file if it's provided
+        imageUploadRequest.files.add(await http.MultipartFile.fromPath(
+          'profile_image',
+          _profileImage,
+        ));
+      }
+      final streamedResponse = await imageUploadRequest.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        print('Response body234: ${response.body}');
+        Get.snackbar(
+          "Success!",
+          "Merchant add successfully.",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          borderRadius: 10,
+          margin: EdgeInsets.all(10),
+        );
+        notifyListeners();
+        return true;
+      }else if(response.statusCode == 500){
+        print('Response 3333: ${response.statusCode}');
+        Get.snackbar(
+          "Error!",
+          "There is an issue on server.",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          borderRadius: 10,
+          margin: EdgeInsets.all(10),
+        );
+      }else if(response.statusCode == 403){
+        try {
+          final List<dynamic> errors = json.decode(response.body)['errors'];
+          final List<dynamic> errorMessages = errors.map((error) => error['message']).toList();
+
+          if (errorMessages.isNotEmpty) {
+            // Show a Snackbar with the error messages
+            for(var message in errorMessages){
+              Get.snackbar(
+                "Error!",
+                message,
+                snackPosition: SnackPosition.TOP,
+                backgroundColor: Colors.red,
+                colorText: Colors.white,
+                borderRadius: 10,
+                margin: EdgeInsets.all(10),
+              );
+            }
+          }
+        } catch (e) {
+          print('Error parsing API response: $e');
+        }
+        print('Response body234: ${response.body}');
+        print('Response code234 : ${response.statusCode}');
+      }else if(response.statusCode == 401){
+        Get.snackbar(
+          "Warning!",
+          "Authentication failed. please login again!",
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          borderRadius: 10,
+          margin: EdgeInsets.all(10),
+        );
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', '');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
       }
     }catch (e){
       throw Exception('Failed to connect to the server: $e');
