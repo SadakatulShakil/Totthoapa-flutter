@@ -10,9 +10,11 @@ import 'package:tottho_apa_flutter/Screens/profile_screen.dart';
 import '../Api/auth_service.dart';
 import '../Models/district_model.dart';
 import '../Models/upazila_model.dart';
+import '../Providers/connectivity_provider.dart';
 import '../Providers/district_provider.dart';
 import '../Providers/upazila_provider.dart';
 import '../Providers/user_provider.dart';
+import '../Widgets/connectivity_dialog.dart';
 import 'login_screen.dart';
 
 class ProfileUpdateScreen extends StatefulWidget {
@@ -21,6 +23,7 @@ class ProfileUpdateScreen extends StatefulWidget {
 }
 
 class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
+  late Future<void> _initFuture;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -109,34 +112,50 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   @override
   void initState() {
     super.initState();
-    final profileProvider =
-    Provider.of<ProfileProvider>(context, listen: false);
-    context.read<DistrictProvider>().fetchDistricts();
-    nameController.text = profileProvider.firstName.toString() ?? 'N/A';
-    phoneController.text = profileProvider.phoneNo.toString() ?? 'N/A';
-    emailController.text = profileProvider.email.toString() ?? 'N/A';
-    zipCodeController.text = profileProvider.zipNo.toString() ?? 'N/A';
-    Future.delayed(Duration.zero, ()async{
-      profileProvider.setDistrictId(profileProvider.districtId.toString());
-      await context.read<UpazilaProvider>().fetchUpazilas(int.tryParse(profileProvider.districtId.toString())??-1);
-      // Delayed execution to ensure the district dropdown is populated before setting the upazila
-      Future.delayed(Duration(milliseconds: 500), () {
-        // Get the Upazila object from the list using the selectedUpazilaId
-        Upazila selectedUpazila = context.read<UpazilaProvider>().upazilas.firstWhere(
-              (upazila) => upazila.id.toString() == (profileProvider.upazilaId.toString()),
-          orElse: () => Upazila(id: -1, district: 56, upazila: 'N/A'), // Default to a placeholder if not found
-        );
-
-        profileProvider.setUpazilaId(selectedUpazila.id.toString());
-        context.read<UpazilaProvider>().setSelectedUpazilaObject(selectedUpazila);
-      });
+    Future.delayed(Duration.zero,(){
+      _initFuture = _init();
     });
-  }
 
+  }
+  Future<void> _init() async {
+    final connectivityProvider = Provider.of<ConnectivityProvider>(context, listen: false);
+
+    if (connectivityProvider.status == ConnectivityStatus.Offline) {
+      // Show the connectivity dialog
+      showDialog(
+        context: context,
+        builder: (context) => ConnectivityDialog(),
+      );
+    }else{
+      final profileProvider =
+      Provider.of<ProfileProvider>(context, listen: false);
+      context.read<DistrictProvider>().fetchDistricts();
+      nameController.text = profileProvider.firstName.toString() ?? 'N/A';
+      phoneController.text = profileProvider.phoneNo.toString() ?? 'N/A';
+      emailController.text = profileProvider.email.toString() ?? 'N/A';
+      zipCodeController.text = profileProvider.zipNo.toString() ?? 'N/A';
+      Future.delayed(Duration.zero, ()async{
+        profileProvider.setDistrictId(profileProvider.districtId.toString());
+        await context.read<UpazilaProvider>().fetchUpazilas(int.tryParse(profileProvider.districtId.toString())??-1);
+        // Delayed execution to ensure the district dropdown is populated before setting the upazila
+        Future.delayed(Duration(milliseconds: 500), () {
+          // Get the Upazila object from the list using the selectedUpazilaId
+          Upazila selectedUpazila = context.read<UpazilaProvider>().upazilas.firstWhere(
+                (upazila) => upazila.id.toString() == (profileProvider.upazilaId.toString()),
+            orElse: () => Upazila(id: -1, district: 56, upazila: 'N/A'), // Default to a placeholder if not found
+          );
+
+          profileProvider.setUpazilaId(selectedUpazila.id.toString());
+          context.read<UpazilaProvider>().setSelectedUpazilaObject(selectedUpazila);
+        });
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final profileProvider =
     Provider.of<ProfileProvider>(context, listen: false);
+    final connectivityProvider = Provider.of<ConnectivityProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile update'),
@@ -295,7 +314,16 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     // Perform login logic
-                    _updateProfile(context);
+                    if (connectivityProvider.status == ConnectivityStatus.Offline) {
+                      // Show the connectivity dialog
+                      showDialog(
+                        context: context,
+                        builder: (context) => ConnectivityDialog(),
+                      );
+                    }else{
+                      _updateProfile(context);
+                    }
+
                   },
                   style: ElevatedButton.styleFrom(
                     primary: Colors.green,

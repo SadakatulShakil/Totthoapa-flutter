@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Screens/merchant_details_screen.dart';
 import '../Models/merchant_model.dart';
+import '../Providers/connectivity_provider.dart';
 import '../Providers/merchant_provider.dart';
 import '../Providers/user_provider.dart';
+import '../Widgets/connectivity_dialog.dart';
 
 class AllMerchantScreen extends StatefulWidget {
   @override
@@ -11,13 +13,30 @@ class AllMerchantScreen extends StatefulWidget {
 }
 
 class _AllMerchantScreenState extends State<AllMerchantScreen> {
+  late Future<void> _initFuture;
   @override
   void initState() {
     super.initState();
-    final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
-    Provider.of<MerchantProvider>(context, listen: false).fetchMerchants(userToken);
+    Future.delayed(Duration.zero,(){
+      _initFuture = _init();
+    });
   }
 
+  Future<void> _init() async {
+    // Perform your asynchronous initialization here
+    final connectivityProvider = Provider.of<ConnectivityProvider>(context, listen: false);
+
+    if (connectivityProvider.status == ConnectivityStatus.Offline) {
+      // Show the connectivity dialog
+      showDialog(
+        context: context,
+        builder: (context) => ConnectivityDialog(),
+      );
+    }else{
+      final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
+      Provider.of<MerchantProvider>(context, listen: false).fetchMerchants(userToken);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

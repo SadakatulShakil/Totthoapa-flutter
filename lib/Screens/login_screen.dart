@@ -6,7 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Api/auth_service.dart';
 import '../Models/user_model.dart';
+import '../Providers/connectivity_provider.dart';
 import '../Providers/user_provider.dart';
+import '../Widgets/connectivity_dialog.dart';
 import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -82,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final connectivityProvider = Provider.of<ConnectivityProvider>(context,listen: false);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -128,7 +131,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         // Perform login logic
-                        _login(context);
+                        if (connectivityProvider.status == ConnectivityStatus.Offline) {
+                          // Show the connectivity dialog
+                          showDialog(
+                            context: context,
+                            builder: (context) => ConnectivityDialog(),
+                          );
+                        }else{
+                          _login(context);
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.green,

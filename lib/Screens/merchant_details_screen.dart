@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Models/merchant_model.dart';
 import 'package:tottho_apa_flutter/Providers/profile_provider.dart';
 
+import '../Providers/connectivity_provider.dart';
 import '../Providers/crud_merchant_provider.dart';
 import '../Providers/user_provider.dart';
+import '../Widgets/connectivity_dialog.dart';
 import 'add_merchant_screen.dart';
 import 'edit_merchant_screen.dart';
 
@@ -52,6 +54,15 @@ class _MerchantDetailsScreenState extends State<MerchantDetailsScreen>{
 
   @override
   Widget build(BuildContext context) {
+    final connectivityProvider = Provider.of<ConnectivityProvider>(context);
+
+    if (connectivityProvider.status == ConnectivityStatus.Offline) {
+      // Show the connectivity dialog
+      showDialog(
+        context: context,
+        builder: (context) => ConnectivityDialog(),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Merchant Information'),

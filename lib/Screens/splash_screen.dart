@@ -6,7 +6,9 @@ import 'dart:async';
 import 'package:tottho_apa_flutter/Screens/login_screen.dart';
 import 'package:tottho_apa_flutter/Screens/main_screen.dart';
 
+import '../Providers/connectivity_provider.dart';
 import '../Providers/user_provider.dart';
+import '../Widgets/connectivity_dialog.dart';
 
 class SplashScreen extends StatefulWidget {
   @override

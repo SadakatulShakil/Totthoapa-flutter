@@ -11,9 +11,11 @@ import 'package:tottho_apa_flutter/Providers/crud_merchant_provider.dart';
 import '../Models/add_merchant_model.dart';
 import '../Models/district_model.dart';
 import '../Models/upazila_model.dart';
+import '../Providers/connectivity_provider.dart';
 import '../Providers/district_provider.dart';
 import '../Providers/upazila_provider.dart';
 import '../Providers/user_provider.dart';
+import '../Widgets/connectivity_dialog.dart';
 
 class AddMerchant extends StatefulWidget {
   String from;
@@ -26,6 +28,7 @@ class AddMerchant extends StatefulWidget {
 
 class _AddMerchantState extends State<AddMerchant> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late Future<void> _initFuture;
   TextEditingController storeNameController = TextEditingController();
   TextEditingController merchantNameController = TextEditingController();
   TextEditingController phoneNo1Controller = TextEditingController();
@@ -128,54 +131,56 @@ class _AddMerchantState extends State<AddMerchant> {
   @override
   void initState() {
     super.initState();
-    final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
-    _checkLocationPermission();
-    context.read<DistrictProvider>().fetchDistricts();
-    Future.delayed(Duration.zero,()async{
-      addMerchantProvider
-          .setDistrictId(addMerchantProvider.districtId.toString());
-      await context.read<UpazilaProvider>().fetchUpazilas(
-          int.tryParse(addMerchantProvider.districtId.toString()) ?? -1);
-      // Delayed execution to ensure the district dropdown is populated before setting the upazila
-      Future.delayed(Duration(milliseconds: 500), () {
-        // Get the Upazila object from the list using the selectedUpazilaId
-        Upazila selectedUpazila =
-        context.read<UpazilaProvider>().upazilas.firstWhere(
-              (upazila) =>
-          upazila.id.toString() ==
-              (addMerchantProvider.upazilaId.toString()),
-          orElse: () => Upazila(
-              id: -1,
-              district: 56,
-              upazila: 'N/A'), // Default to a placeholder if not found
-        );
-
-        addMerchantProvider.setUpazilaId(selectedUpazila.id.toString());
-        context
-            .read<UpazilaProvider>()
-            .setSelectedUpazilaObject(selectedUpazila);
-      });
+    Future.delayed(Duration.zero,(){
+      _initFuture = _init();
     });
+  }
 
+  Future<void> _init() async {
+    final connectivityProvider = Provider.of<ConnectivityProvider>(context, listen: false);
 
-    // storeNameController.text = addMerchantProvider.shopName;
-    // merchantNameController.text = addMerchantProvider.firstName;
-    // phoneNo1Controller.text = addMerchantProvider.primaryPhoneNumber;
-    // phoneNo2Controller.text = addMerchantProvider.secondPhoneNumber;
-    // emailController.text = addMerchantProvider.emailAddress;
-    // nidController.text = addMerchantProvider.nidNumber;
-    // accountHolderNameController.text = addMerchantProvider.accountName;
-    // bankNameController.text = addMerchantProvider.bankName;
-    // accountNoController.text = addMerchantProvider.accountNumber;
-    // userAddressController.text = addMerchantProvider.userAddress;
-    // passwordController.text = addMerchantProvider.userPassword;
-    // confirmPasswordController.text = addMerchantProvider.userCPassword;
+    if (connectivityProvider.status == ConnectivityStatus.Offline) {
+      // Show the connectivity dialog
+      showDialog(
+        context: context,
+        builder: (context) => ConnectivityDialog(),
+      );
+    }else{
+      final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
+      _checkLocationPermission();
+      context.read<DistrictProvider>().fetchDistricts();
+      Future.delayed(Duration.zero,(){
+        addMerchantProvider
+            .setDistrictId(addMerchantProvider.districtId.toString());
+        // Delayed execution to ensure the district dropdown is populated before setting the upazila
+        Future.delayed(Duration(milliseconds: 500), () async{
+          // Get the Upazila object from the list using the selectedUpazilaId
+          await context.read<UpazilaProvider>().fetchUpazilas(
+              int.tryParse(addMerchantProvider.districtId.toString()) ?? -1);
+          Upazila selectedUpazila =
+          context.read<UpazilaProvider>().upazilas.firstWhere(
+                (upazila) =>
+            upazila.id.toString() ==
+                (addMerchantProvider.upazilaId.toString()),
+            orElse: () => Upazila(
+                id: -1,
+                district: 56,
+                upazila: 'N/A'), // Default to a placeholder if not found
+          );
 
+          addMerchantProvider.setUpazilaId(selectedUpazila.id.toString());
+          context
+              .read<UpazilaProvider>()
+              .setSelectedUpazilaObject(selectedUpazila);
+        });
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
+    final connectivityProvider = Provider.of<ConnectivityProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Merchant'),
@@ -503,70 +508,44 @@ class _AddMerchantState extends State<AddMerchant> {
                     child: ElevatedButton(
                       onPressed: () async{
                         ///demo check
+                        if (connectivityProvider.status == ConnectivityStatus.Offline) {
+                          // Show the connectivity dialog
+                          showDialog(
+                            context: context,
+                            builder: (context) => ConnectivityDialog(),
+                          );
+                        }else{
+                          // print('data: '+
+                          //     addMerchantProvider.latitude+"--"+
+                          //     addMerchantProvider.longitude+"--"+
+                          //     addMerchantProvider.firstName+"--"+
+                          //     addMerchantProvider.primaryPhoneNumber+"--"+
+                          //     addMerchantProvider.secondPhoneNumber+"--"+
+                          //     addMerchantProvider.nidNumber+"--"+
+                          //     addMerchantProvider.emailAddress+"--"+
+                          //     addMerchantProvider.userPassword+"--"+
+                          //     addMerchantProvider.userCPassword+"--"+
+                          //     addMerchantProvider.shopName+"--"+
+                          //     addMerchantProvider.userAddress+"--"+
+                          //     selectedImagePathForReporting+"--"+
+                          //     addMerchantProvider.districtId+"--"+
+                          //     addMerchantProvider.upazilaId+"--"+
+                          //     addMerchantProvider.accountName+"--"+
+                          //     addMerchantProvider.bankName+"--"+
+                          //     addMerchantProvider.paymentMethod+"--"+
+                          //     addMerchantProvider.accountNumber+"--"+
+                          //     addMerchantProvider.memberOfJoita+"--"+
+                          //     addMerchantProvider.trainingOfFmsName+"--"+
+                          //     addMerchantProvider.isTrainedOfFms+" --->end"
+                          // );
 
-                        // print('data: '+
-                        //     addMerchantProvider.latitude+"--"+
-                        //     addMerchantProvider.longitude+"--"+
-                        //     addMerchantProvider.firstName+"--"+
-                        //     addMerchantProvider.primaryPhoneNumber+"--"+
-                        //     addMerchantProvider.secondPhoneNumber+"--"+
-                        //     addMerchantProvider.nidNumber+"--"+
-                        //     addMerchantProvider.emailAddress+"--"+
-                        //     addMerchantProvider.userPassword+"--"+
-                        //     addMerchantProvider.userCPassword+"--"+
-                        //     addMerchantProvider.shopName+"--"+
-                        //     addMerchantProvider.userAddress+"--"+
-                        //     selectedImagePathForReporting+"--"+
-                        //     addMerchantProvider.districtId+"--"+
-                        //     addMerchantProvider.upazilaId+"--"+
-                        //     addMerchantProvider.accountName+"--"+
-                        //     addMerchantProvider.bankName+"--"+
-                        //     addMerchantProvider.paymentMethod+"--"+
-                        //     addMerchantProvider.accountNumber+"--"+
-                        //     addMerchantProvider.memberOfJoita+"--"+
-                        //     addMerchantProvider.trainingOfFmsName+"--"+
-                        //     addMerchantProvider.isTrainedOfFms+" --->end"
-                        // );
+                          ///Actual logic
 
-                        ///Actual logic
-
-                        if(isMerchantPaymentEnabled){
-                          if(addMerchantProvider.paymentMethod==''){
-                            Get.snackbar(
-                              "Validation Error!",
-                              "One Payment method is required.",
-                              snackPosition: SnackPosition.TOP,
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white,
-                              borderRadius: 10,
-                              margin: EdgeInsets.all(10),
-                            );
-                          }
-                          if(addMerchantProvider.paymentMethod !=''){
-                            if(addMerchantProvider.accountName == ''){
+                          if(isMerchantPaymentEnabled){
+                            if(addMerchantProvider.paymentMethod==''){
                               Get.snackbar(
                                 "Validation Error!",
-                                "Account holder name is required.",
-                                snackPosition: SnackPosition.TOP,
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                                borderRadius: 10,
-                                margin: EdgeInsets.all(10),
-                              );
-                            }else if(addMerchantProvider.bankName == ''){
-                              Get.snackbar(
-                                "Validation Error!",
-                                "Bank name is required.",
-                                snackPosition: SnackPosition.TOP,
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                                borderRadius: 10,
-                                margin: EdgeInsets.all(10),
-                              );
-                            }else if(addMerchantProvider.accountNumber == ''){
-                              Get.snackbar(
-                                "Validation Error!",
-                                "Account number is required.",
+                                "One Payment method is required.",
                                 snackPosition: SnackPosition.TOP,
                                 backgroundColor: Colors.red,
                                 colorText: Colors.white,
@@ -574,24 +553,56 @@ class _AddMerchantState extends State<AddMerchant> {
                                 margin: EdgeInsets.all(10),
                               );
                             }
-                          }
-                        }
-                         else if(addMerchantProvider.isTrainedOfFms == '1'){
-                          print("--------? "+addMerchantProvider.trainingOfFmsName);
-                          if(addMerchantProvider.trainingOfFmsName == ''){
-                            {
-                              Get.snackbar(
-                                "Validation Error!",
-                                "Training name is required.",
-                                snackPosition: SnackPosition.TOP,
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                                borderRadius: 10,
-                                margin: EdgeInsets.all(10),
-                              );
+                            if(addMerchantProvider.paymentMethod !=''){
+                              if(addMerchantProvider.accountName == ''){
+                                Get.snackbar(
+                                  "Validation Error!",
+                                  "Account holder name is required.",
+                                  snackPosition: SnackPosition.TOP,
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                  borderRadius: 10,
+                                  margin: EdgeInsets.all(10),
+                                );
+                              }else if(addMerchantProvider.bankName == ''){
+                                Get.snackbar(
+                                  "Validation Error!",
+                                  "Bank name is required.",
+                                  snackPosition: SnackPosition.TOP,
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                  borderRadius: 10,
+                                  margin: EdgeInsets.all(10),
+                                );
+                              }else if(addMerchantProvider.accountNumber == ''){
+                                Get.snackbar(
+                                  "Validation Error!",
+                                  "Account number is required.",
+                                  snackPosition: SnackPosition.TOP,
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                  borderRadius: 10,
+                                  margin: EdgeInsets.all(10),
+                                );
+                              }
                             }
                           }
-                        }
+                          else if(addMerchantProvider.isTrainedOfFms == '1'){
+                            print("--------? "+addMerchantProvider.trainingOfFmsName);
+                            if(addMerchantProvider.trainingOfFmsName == ''){
+                              {
+                                Get.snackbar(
+                                  "Validation Error!",
+                                  "Training name is required.",
+                                  snackPosition: SnackPosition.TOP,
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                  borderRadius: 10,
+                                  margin: EdgeInsets.all(10),
+                                );
+                              }
+                            }
+                          }
                           if (_formKey.currentState!.validate()) {
                             // The form is valid, perform your actions here
                             final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
@@ -636,6 +647,7 @@ class _AddMerchantState extends State<AddMerchant> {
                               isMerchantPaymentEnabled = false;
                             });
                           }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.green,

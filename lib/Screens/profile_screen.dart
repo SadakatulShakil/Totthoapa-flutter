@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Providers/profile_provider.dart';
 import 'package:tottho_apa_flutter/Screens/profile_update_screen.dart';
 
-import '../Providers/user_provider.dart';
+import '../Providers/connectivity_provider.dart';
+import '../Widgets/connectivity_dialog.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override

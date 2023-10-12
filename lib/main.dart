@@ -3,6 +3,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tottho_apa_flutter/Providers/connectivity_provider.dart';
 import 'package:tottho_apa_flutter/Providers/crud_merchant_provider.dart';
 import 'package:tottho_apa_flutter/Providers/district_provider.dart';
 import 'package:tottho_apa_flutter/Providers/upazila_provider.dart';
@@ -46,6 +47,7 @@ void main() async{
       ChangeNotifierProvider(create: (_) => DistrictProvider()),
       ChangeNotifierProvider(create: (_) => UpazilaProvider()),
       ChangeNotifierProvider(create: (_) => CrudMerchantProvider()),
+      ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
     ], child: MyApp()),
   );
 }

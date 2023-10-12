@@ -1,11 +1,9 @@
+import 'dart:math'; // Import the math package for random number generation
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tottho_apa_flutter/Api/auth_service.dart';
-import 'package:tottho_apa_flutter/Providers/crud_merchant_provider.dart';
 import 'package:tottho_apa_flutter/Screens/add_merchant_screen.dart';
 import 'package:tottho_apa_flutter/Screens/incomplete_order_screen.dart';
 import 'package:tottho_apa_flutter/Screens/login_screen.dart';
@@ -13,12 +11,14 @@ import 'package:tottho_apa_flutter/Screens/new_order_screen.dart';
 import 'package:tottho_apa_flutter/Screens/profile_screen.dart';
 import 'package:tottho_apa_flutter/Screens/total_delivery_screen.dart';
 import 'package:tottho_apa_flutter/Screens/total_order_screen.dart';
-import 'dart:math'; // Import the math package for random number generation
+
 import '../Api/dashBoard_service.dart';
 import '../Models/add_merchant_model.dart';
+import '../Providers/connectivity_provider.dart';
 import '../Providers/dashboard_provider.dart';
 import '../Providers/profile_provider.dart';
 import '../Providers/user_provider.dart';
+import '../Widgets/connectivity_dialog.dart';
 import 'all_merchant_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -27,6 +27,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  late Future<void> _initFuture;
   merchantDataModel userData = merchantDataModel.nullConstructor();
   Future<void> _fetchDashboardData(BuildContext context) async {
     try {
@@ -86,16 +87,29 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _refreshDashboardData() async {
-    await _fetchDashboardData(context);
-    await _fetchProfileData(context);
+    final connectivityProvider = Provider.of<ConnectivityProvider>(context,listen: false);
+    if (connectivityProvider.status == ConnectivityStatus.Offline) {
+      // Show the connectivity dialog
+      showDialog(
+        context: context,
+        builder: (context) => ConnectivityDialog(),
+      );
+    }else{
+      await _fetchDashboardData(context);
+      await _fetchProfileData(context);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    _fetchDashboardData(context); // Fetch dashboard data on screen load
-    _fetchProfileData(context); // Fetch profile data on screen load
+    Future.delayed(Duration.zero,(){
+      _fetchDashboardData(context); // Fetch dashboard data on screen load
+      _fetchProfileData(context);
+    });
+
   }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
