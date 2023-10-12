@@ -17,25 +17,10 @@ class _AllMerchantScreenState extends State<AllMerchantScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero,(){
-      _initFuture = _init();
-    });
-  }
-
-  Future<void> _init() async {
-    // Perform your asynchronous initialization here
-    final connectivityProvider = Provider.of<ConnectivityProvider>(context, listen: false);
-
-    if (connectivityProvider.status == ConnectivityStatus.Offline) {
-      // Show the connectivity dialog
-      showDialog(
-        context: context,
-        builder: (context) => ConnectivityDialog(),
-      );
-    }else{
+    Future.delayed(Duration(microseconds: 500),(){
       final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
       Provider.of<MerchantProvider>(context, listen: false).fetchMerchants(userToken);
-    }
+    });
   }
   @override
   Widget build(BuildContext context) {

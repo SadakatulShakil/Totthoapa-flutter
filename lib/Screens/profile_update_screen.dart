@@ -51,7 +51,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
         try {
           Get.snackbar(
             "Success!",
-            "Successfully logged in",
+            "Successfully data updated",
             snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.yellow,
             colorText: Colors.white,

@@ -123,7 +123,7 @@ class _MainScreenState extends State<MainScreen> {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('লাল সবুজ'),
+          title: Text('appbar_dashboard'.tr),
         ),
         drawer: Drawer(
           child: DrawerContent(userData),
@@ -194,7 +194,7 @@ class DrawerContent extends StatelessWidget {
           child: ListTile(
 
             leading: Icon(Icons.home),
-            title: Text('Home'),
+            title: Text('drawer_one'.tr),
           ),
         ),
         GestureDetector(
@@ -205,7 +205,7 @@ class DrawerContent extends StatelessWidget {
           },
           child: ListTile(
             leading: Icon(Icons.person),
-            title: Text('Profile'),
+            title: Text('drawer_two'.tr),
           ),
         ),
         GestureDetector(
@@ -216,7 +216,7 @@ class DrawerContent extends StatelessWidget {
           },
           child: ListTile(
             leading: Icon(Icons.add),
-            title: Text('Add Merchant'),
+            title: Text('drawer_three'.tr),
           ),
         ),
         GestureDetector(
@@ -228,7 +228,7 @@ class DrawerContent extends StatelessWidget {
           },
           child: ListTile(
             leading: Icon(Icons.store),
-            title: Text('All Merchant'),
+            title: Text('drawer_four'.tr),
           ),
         ),
         GestureDetector(
@@ -240,7 +240,7 @@ class DrawerContent extends StatelessWidget {
           },
           child: ListTile(
             leading: Icon(Icons.shopping_cart),
-            title: Text('New Order'),
+            title: Text('new_order'.tr),
           ),
         ),
         GestureDetector(
@@ -252,7 +252,7 @@ class DrawerContent extends StatelessWidget {
           },
           child: ListTile(
             leading: Icon(Icons.delivery_dining),
-            title: Text('Today Delivery'),
+            title: Text('today_delivery'.tr),
           ),
         ),
         GestureDetector(
@@ -264,7 +264,7 @@ class DrawerContent extends StatelessWidget {
           },
           child: ListTile(
             leading: Icon(Icons.assignment),
-            title: Text('Total Order'),
+            title: Text('total_order'.tr),
           ),
         ),
         GestureDetector(
@@ -276,7 +276,7 @@ class DrawerContent extends StatelessWidget {
           },
           child: ListTile(
             leading: Icon(Icons.close),
-            title: Text('Incomplete Order'),
+            title: Text('incomplete_order'.tr),
           ),
         ),
         GestureDetector(
@@ -290,13 +290,18 @@ class DrawerContent extends StatelessWidget {
           },
           child: ListTile(
             leading: Icon(Icons.logout),
-            title: Text('Logout'),
+            title: Text('logout'.tr),
           ),
         ),
-        // ListTile(
-        //   leading: Icon(Icons.update),
-        //   title: Text('Update'),
-        // ),
+        GestureDetector(
+          onTap: (){
+            //Provider.of<LanguageProvider>(context, listen: false).toggleLanguage(context);
+          },
+          child: ListTile(
+            leading: Icon(Icons.language),
+            title: Text('switch_to_english'.tr),
+          ),
+        ),
       ],
     );
   }
@@ -333,12 +338,12 @@ class Dashboard extends StatelessWidget {
           shrinkWrap: true,
           padding: EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 50),
           children: [
-            DashboardCard(Icons.star, 'New Order', dashboardProvider.totalPending.toString()),
-            DashboardCard(Icons.delivery_dining, 'Today delivery', dashboardProvider.totalShipped.toString()),
-            DashboardCard(Icons.shop, 'Total Order', dashboardProvider.totalOrder.toString()),
-            DashboardCard(Icons.price_change, 'Total Order Cost', '৳ '+dashboardProvider.totalOrderPrice.toString()),
-            DashboardCard(Icons.cancel, 'Incomplete Order', dashboardProvider.totalProcessing.toString()),
-            DashboardCard(Icons.people, 'Total merchant', dashboardProvider.totalMerchant.toString()),
+            DashboardCard(Icons.star, 'new_order'.tr, dashboardProvider.totalPending.toString()),
+            DashboardCard(Icons.delivery_dining, 'today_delivery'.tr, dashboardProvider.totalShipped.toString()),
+            DashboardCard(Icons.shop, 'total_order'.tr, dashboardProvider.totalOrder.toString()),
+            DashboardCard(Icons.price_change, 'total_order_cost'.tr, '৳ '+dashboardProvider.totalOrderPrice.toString()),
+            DashboardCard(Icons.cancel, 'incomplete_order'.tr, dashboardProvider.totalProcessing.toString()),
+            DashboardCard(Icons.people, 'total_merchant'.tr, dashboardProvider.totalMerchant.toString()),
           ],
         ),
       ],

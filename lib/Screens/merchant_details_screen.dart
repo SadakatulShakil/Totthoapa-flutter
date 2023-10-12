@@ -54,15 +54,6 @@ class _MerchantDetailsScreenState extends State<MerchantDetailsScreen>{
 
   @override
   Widget build(BuildContext context) {
-    final connectivityProvider = Provider.of<ConnectivityProvider>(context);
-
-    if (connectivityProvider.status == ConnectivityStatus.Offline) {
-      // Show the connectivity dialog
-      showDialog(
-        context: context,
-        builder: (context) => ConnectivityDialog(),
-      );
-    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Merchant Information'),

@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Providers/crud_merchant_provider.dart';
 import 'package:tottho_apa_flutter/Providers/profile_provider.dart';
+import 'package:tottho_apa_flutter/Screens/main_screen.dart';
 
 import '../Models/add_merchant_model.dart';
 import '../Models/district_model.dart';
@@ -134,67 +135,52 @@ class _EditMerchantScreenState extends State<EditMerchantScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero,(){
-      _initFuture = _init();
-    });
-  }
-  Future<void> _init() async {
-    final connectivityProvider = Provider.of<ConnectivityProvider>(context,listen: false);
+    Future.delayed(Duration.zero, () {
+      final addMerchantProvider =
+      Provider.of<CrudMerchantProvider>(context, listen: false);
+      _checkLocationPermission();
+      print("check value: "+ addMerchantProvider.trainingOfFmsName+"---"+addMerchantProvider.bankName);
+      context.read<DistrictProvider>().fetchDistricts();
+      storeNameController.text = addMerchantProvider.shopName;
+      merchantNameController.text = addMerchantProvider.firstName;
+      phoneNo1Controller.text = addMerchantProvider.primaryPhoneNumber;
+      phoneNo2Controller.text = addMerchantProvider.secondPhoneNumber;
+      emailController.text = addMerchantProvider.emailAddress;
+      nidController.text = addMerchantProvider.nidNumber;
+      accountHolderNameController.text = addMerchantProvider.accountName;
+      bankNameController.text = addMerchantProvider.bankName;
+      accountNoController.text = addMerchantProvider.accountNumber;
+      userAddressController.text = addMerchantProvider.userAddress;
+      passwordController.text = addMerchantProvider.userPassword;
+      confirmPasswordController.text = addMerchantProvider.userCPassword;
 
-    if (connectivityProvider.status == ConnectivityStatus.Offline) {
-      // Show the connectivity dialog
-      showDialog(
-        context: context,
-        builder: (context) => ConnectivityDialog(),
-      );
-    }else{
-      Future.delayed(Duration.zero, () {
-        final addMerchantProvider =
-        Provider.of<CrudMerchantProvider>(context, listen: false);
-        _checkLocationPermission();
-        print("check value: "+ addMerchantProvider.trainingOfFmsName+"---"+addMerchantProvider.bankName);
-        context.read<DistrictProvider>().fetchDistricts();
-        storeNameController.text = addMerchantProvider.shopName;
-        merchantNameController.text = addMerchantProvider.firstName;
-        phoneNo1Controller.text = addMerchantProvider.primaryPhoneNumber;
-        phoneNo2Controller.text = addMerchantProvider.secondPhoneNumber;
-        emailController.text = addMerchantProvider.emailAddress;
-        nidController.text = addMerchantProvider.nidNumber;
-        accountHolderNameController.text = addMerchantProvider.accountName;
-        bankNameController.text = addMerchantProvider.bankName;
-        accountNoController.text = addMerchantProvider.accountNumber;
-        userAddressController.text = addMerchantProvider.userAddress;
-        passwordController.text = addMerchantProvider.userPassword;
-        confirmPasswordController.text = addMerchantProvider.userCPassword;
+      print("districtId: " + addMerchantProvider.districtId.toString());
+      Future.delayed(Duration.zero,(){
+        addMerchantProvider
+            .setDistrictId(addMerchantProvider.districtId.toString());
+        // Delayed execution to ensure the district dropdown is populated before setting the upazila
+        Future.delayed(Duration(milliseconds: 500), () async{
+          await context.read<UpazilaProvider>().fetchUpazilas(
+              int.tryParse(addMerchantProvider.districtId.toString()) ?? -1);
+          // Get the Upazila object from the list using the selectedUpazilaId
+          Upazila selectedUpazila =
+          context.read<UpazilaProvider>().upazilas.firstWhere(
+                (upazila) =>
+            upazila.id.toString() ==
+                (addMerchantProvider.upazilaId.toString()),
+            orElse: () => Upazila(
+                id: -1,
+                district: 56,
+                upazila: 'N/A'), // Default to a placeholder if not found
+          );
 
-        print("districtId: " + addMerchantProvider.districtId.toString());
-        Future.delayed(Duration.zero,(){
-          addMerchantProvider
-              .setDistrictId(addMerchantProvider.districtId.toString());
-          // Delayed execution to ensure the district dropdown is populated before setting the upazila
-          Future.delayed(Duration(milliseconds: 500), () async{
-            await context.read<UpazilaProvider>().fetchUpazilas(
-                int.tryParse(addMerchantProvider.districtId.toString()) ?? -1);
-            // Get the Upazila object from the list using the selectedUpazilaId
-            Upazila selectedUpazila =
-            context.read<UpazilaProvider>().upazilas.firstWhere(
-                  (upazila) =>
-              upazila.id.toString() ==
-                  (addMerchantProvider.upazilaId.toString()),
-              orElse: () => Upazila(
-                  id: -1,
-                  district: 56,
-                  upazila: 'N/A'), // Default to a placeholder if not found
-            );
-
-            addMerchantProvider.setUpazilaId(selectedUpazila.id.toString());
-            context
-                .read<UpazilaProvider>()
-                .setSelectedUpazilaObject(selectedUpazila);
-          });
+          addMerchantProvider.setUpazilaId(selectedUpazila.id.toString());
+          context
+              .read<UpazilaProvider>()
+              .setSelectedUpazilaObject(selectedUpazila);
         });
       });
-    }
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -340,11 +326,13 @@ class _EditMerchantScreenState extends State<EditMerchantScreen> {
                                 value: addMerchantProvider.upazilaId,
                                 onChanged: (value) {
                                   setState(() {
-                                    final selectedUpazila = upazilaProvider.upazilas.firstWhere((upazila) =>
-                                    upazila.id.toString() == value);
-                                    addMerchantProvider.updateUpazilaName(
-                                        selectedUpazila.upazila);
-                                    addMerchantProvider.setUpazilaId(value.toString());
+                                    Future.delayed(Duration(microseconds: 500),(){
+                                      final selectedUpazila = upazilaProvider.upazilas.firstWhere((upazila) =>
+                                      upazila.id.toString() == value);
+                                      addMerchantProvider.updateUpazilaName(
+                                          selectedUpazila.upazila);
+                                      addMerchantProvider.setUpazilaId(value.toString());
+                                    });
                                   });
                                 },
                                 hint: Text('Select Upazila'),
@@ -674,6 +662,10 @@ class _EditMerchantScreenState extends State<EditMerchantScreen> {
                                 userToken);
                             await addMerchantProvider.updateMerchantDataToServer(
                                 context, userToken, addMerchantProvider.id);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MainScreen()));
                             print('data: ' +
                                 addMerchantProvider.latitude +
                                 "--" +
@@ -733,10 +725,6 @@ class _EditMerchantScreenState extends State<EditMerchantScreen> {
                               addMerchantProvider.isMerchantPaymentEnabled =
                               false;
                             });
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AllMerchantScreen()));
                           }
                         }
 

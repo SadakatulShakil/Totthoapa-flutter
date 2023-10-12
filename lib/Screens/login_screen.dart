@@ -81,7 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final connectivityProvider = Provider.of<ConnectivityProvider>(context,listen: false);
@@ -107,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Align(
                   alignment: Alignment.center,
                   child: Text(
-                    'Welcome to my app',
+                    'welcome_login'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -123,13 +122,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     TextField(
                       controller: phoneController,
-                      decoration: InputDecoration(labelText: 'Phone'),
+                      decoration: InputDecoration(labelText: 'phone_label'.tr),
                     ),
                     SizedBox(height: 10),
                     TextField(
                       controller: passwordController,
                       obscureText: true,
-                      decoration: InputDecoration(labelText: 'Password'),
+                      decoration: InputDecoration(labelText: 'password_label'.tr),
                     ),
                     SizedBox(height: 20),
                     Container(
@@ -153,10 +152,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: isLoading
                             ? CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                            Colors.green,
                           ),
                         )
-                            : Text('Login'),
+                            : Text('login_btn'.tr),
                       ),
                     ),
                   ],
@@ -169,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Column(
                       children: [
-                        Text('Task A'),
+                        Text('task_a'.tr),
                         Container(
 
                             child: Image.asset('assets/images/totthoapa.png', width: 100, height: 50,)), // Replace with your image asset
@@ -180,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Column(
                       children: [
                         SizedBox(height: 10,),
-                        Text('Task B'),
+                        Text('task_b'.tr),
                         SizedBox(height: 10,),
                         Image.asset('assets/images/bfti_icon.png', width: 100, height: 50,), // Replace with your image asset
                         Image.asset('assets/images/com_jagat.png', width: 100, height: 50,), // Replace with your image asset
@@ -191,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 10,),
               Text(
-                'Task C',
+                'task_c'.tr,
                 style: TextStyle(
                   fontSize: 15,
                 ),

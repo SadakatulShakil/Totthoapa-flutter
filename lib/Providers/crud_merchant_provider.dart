@@ -485,8 +485,8 @@ class CrudMerchantProvider extends ChangeNotifier {
     _shopName = '';
     _userAddress = '';
     _profileImage = '';
-    _districtId = '';
-    _upazilaId = '';
+    _districtId = '14';
+    _upazilaId = '118';
     _paymentMethod = '';
     _accountName = '';
     _bankName = '';

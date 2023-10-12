@@ -132,20 +132,6 @@ class _AddMerchantState extends State<AddMerchant> {
   void initState() {
     super.initState();
     Future.delayed(Duration.zero,(){
-      _initFuture = _init();
-    });
-  }
-
-  Future<void> _init() async {
-    final connectivityProvider = Provider.of<ConnectivityProvider>(context, listen: false);
-
-    if (connectivityProvider.status == ConnectivityStatus.Offline) {
-      // Show the connectivity dialog
-      showDialog(
-        context: context,
-        builder: (context) => ConnectivityDialog(),
-      );
-    }else{
       final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
       _checkLocationPermission();
       context.read<DistrictProvider>().fetchDistricts();
@@ -174,7 +160,7 @@ class _AddMerchantState extends State<AddMerchant> {
               .setSelectedUpazilaObject(selectedUpazila);
         });
       });
-    }
+    });
   }
 
   @override
@@ -183,7 +169,7 @@ class _AddMerchantState extends State<AddMerchant> {
     final connectivityProvider = Provider.of<ConnectivityProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Merchant'),
+        title: Text('appbar_add_merchant'.tr),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -208,32 +194,32 @@ class _AddMerchantState extends State<AddMerchant> {
                     SizedBox(width: 10.0),
                     Expanded(
                       child: Text(
-                        'Upload a photo for the business of the merchant. Type should be .png, .jpg, .jpeg',
+                        'image_note'.tr,
                         style: TextStyle(color: Colors.grey),
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 16.0),
-                buildRequiredLabel('Store Name*', true),
+                buildRequiredLabel('store_name'.tr, true),
                 buildTextField(storeNameController, onChanged: addMerchantProvider.updateShopName, isRequired: true),
                 SizedBox(height: 8.0),
-                buildRequiredLabel('Merchant Name*', true),
+                buildRequiredLabel('merchant_name'.tr, true),
                 buildTextField(merchantNameController, onChanged: addMerchantProvider.updateFirstName, isRequired: true),
                 SizedBox(height: 8.0),
-                buildRequiredLabel('Phone No 1*', true),
+                buildRequiredLabel('phone_no_1'.tr, true),
                 buildTextField(phoneNo1Controller,
                     keyboardType: TextInputType.phone, onChanged: addMerchantProvider.updatePrimaryPhoneNumber, isRequired: true),
                 SizedBox(height: 8.0),
-                buildRequiredLabel('Phone No 2', false),
+                buildRequiredLabel('phone_no_2'.tr, false),
                 buildTextField(phoneNo2Controller,
                     keyboardType: TextInputType.phone, onChanged: addMerchantProvider.updateSecondPhoneNumber),
                 SizedBox(height: 8.0),
-                buildRequiredLabel('Email', false),
+                buildRequiredLabel('email'.tr, false),
                 buildTextField(emailController,
                     keyboardType: TextInputType.emailAddress, onChanged: addMerchantProvider.updateEmailAddress),
                 SizedBox(height: 8.0),
-                buildRequiredLabel('NID', false),
+                buildRequiredLabel('nid'.tr, false),
                 buildTextField(nidController, keyboardType: TextInputType.number, onChanged: addMerchantProvider.updateNidNumber),
                 SizedBox(height: 12),
                 Padding(
@@ -242,13 +228,13 @@ class _AddMerchantState extends State<AddMerchant> {
                     child: Row(
                         children: [
                       Expanded(
-                        child:  buildRequiredLabel('Select district*', true),
+                        child:  buildRequiredLabel('select_district'.tr, true),
                       ),
                       SizedBox(
                         width: 10,
                       ),
                       Expanded(
-                        child: buildRequiredLabel('Select upazila*', true),
+                        child: buildRequiredLabel('select_upazila'.tr, true),
                       ),
                     ]),
                   ),
@@ -286,7 +272,7 @@ class _AddMerchantState extends State<AddMerchant> {
                                     });
                                   });
                                 },
-                                hint: Text('Select district'),
+                                hint: Text('select'.tr),
                                 items: [
                                   ...districtProvider.districts.map((District district) {
                                     return DropdownMenuItem<String>(
@@ -309,14 +295,16 @@ class _AddMerchantState extends State<AddMerchant> {
                                 value: addMerchantProvider.upazilaId,
                                 onChanged: (value) {
                                   setState(() {
-                                    final selectedUpazila = upazilaProvider.upazilas.firstWhere((upazila) =>
-                                    upazila.id.toString() == value);
-                                    addMerchantProvider.updateUpazilaName(
-                                        selectedUpazila.upazila);
-                                    addMerchantProvider.setUpazilaId(value.toString());
+                                    Future.delayed(Duration.zero,(){
+                                      final selectedUpazila = upazilaProvider.upazilas.firstWhere((upazila) =>
+                                      upazila.id.toString() == value);
+                                      addMerchantProvider.updateUpazilaName(
+                                          selectedUpazila.upazila);
+                                      addMerchantProvider.setUpazilaId(value.toString());
+                                    });
                                   });
                                 },
-                                hint: Text('Select Upazila'),
+                                hint: Text('select'.tr),
                                 items: [
                                   ...upazilaProvider.upazilas.map((Upazila upazila) {
                                     return DropdownMenuItem<String>(
@@ -337,17 +325,17 @@ class _AddMerchantState extends State<AddMerchant> {
                   ),
                 ),
                 SizedBox(height: 16.0),
-                buildRequiredLabel('Are you a member of Joyeta?', false),
+                buildRequiredLabel('member_of_joita'.tr, false),
                 Row(
                   children: [
-                    buildRadioButton('Yes',
+                    buildRadioButton('yes'.tr,
                         addMerchantProvider.memberOfJoita == '1',
                         onChanged: (value) {
                           setState(() {
                             addMerchantProvider.updateMemberOfJoita('1');
                           });
                         }),
-                    buildRadioButton('No',
+                    buildRadioButton('no'.tr,
                         addMerchantProvider.memberOfJoita == '0',
                         onChanged: (value) {
                           setState(() {
@@ -358,18 +346,18 @@ class _AddMerchantState extends State<AddMerchant> {
                 ),
                 SizedBox(height: 16.0),
                 buildRequiredLabel(
-                    'Are you taking any training from a women\'s organization?',
+                    'take_training'.tr,
                     false),
                 Row(
                   children: [
-                    buildRadioButton('Yes',
+                    buildRadioButton('yes'.tr,
                         addMerchantProvider.isTrainedOfFms == '1',
                         onChanged: (value) {
                           setState(() {
                             addMerchantProvider.updateIsTrainedOfFms('1');
                           });
                         }),
-                    buildRadioButton('No',
+                    buildRadioButton('no'.tr,
                         addMerchantProvider.isTrainedOfFms == '0',
                         onChanged: (value) {
                           setState(() {
@@ -385,7 +373,7 @@ class _AddMerchantState extends State<AddMerchant> {
                     children: [
                       SizedBox(height: 8.0),
                       buildRequiredLabel(
-                          'Select training name*', true),
+                          'select_training_name'.tr, true),
                       buildDropdownForTraining(
                         value: addMerchantProvider.trainingOfFmsName,
                         onChanged: (value) {
@@ -404,7 +392,7 @@ class _AddMerchantState extends State<AddMerchant> {
                     child: Column(
                       children: [
                         buildSwitch(
-                            'Merchant Payment Way', isMerchantPaymentEnabled,
+                            'payment_way'.tr, isMerchantPaymentEnabled,
                             onChanged: (value) {
                           setState(() {
                             isMerchantPaymentEnabled = value!;
@@ -420,10 +408,10 @@ class _AddMerchantState extends State<AddMerchant> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(height: 8.0),
-                              buildRequiredLabel('Select Payment Method*', true),
+                              buildRequiredLabel('select_payment_method'.tr, true),
                               Row(
                                 children: [
-                                  buildRadioButton('Bank Account',
+                                  buildRadioButton('bank_account'.tr,
                                       addMerchantProvider.paymentMethod == 'bank',
                                       onChanged: (value) {
                                     setState(() {
@@ -433,7 +421,7 @@ class _AddMerchantState extends State<AddMerchant> {
                                       addMerchantProvider.updatePaymentMethod('bank');
                                     });
                                   }),
-                                  buildRadioButton('Mobile Banking',
+                                  buildRadioButton('mobile_banking'.tr,
                                       addMerchantProvider.paymentMethod == 'mobilebank',
                                       onChanged: (value) {
                                     setState(() {
@@ -450,13 +438,13 @@ class _AddMerchantState extends State<AddMerchant> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     buildRequiredLabel(
-                                        'Account Holder Name*', true),
+                                        'account_holder_name'.tr, true),
                                     buildTextField(accountHolderNameController, onChanged: addMerchantProvider.updateAccountName),
                                     SizedBox(height: 8.0),
-                                    buildRequiredLabel('Name of Bank*', true),
+                                    buildRequiredLabel('name_of_bank'.tr, true),
                                     buildTextField(bankNameController, onChanged: addMerchantProvider.updateBankName),
                                     SizedBox(height: 8.0),
-                                    buildRequiredLabel('Account No*', true),
+                                    buildRequiredLabel('account_no'.tr, true),
                                     buildTextField(accountNoController,
                                         keyboardType: TextInputType.number, onChanged: addMerchantProvider.updateAccountNumber),
                                   ],
@@ -466,11 +454,11 @@ class _AddMerchantState extends State<AddMerchant> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     buildRequiredLabel(
-                                        'Account Holder Name*', true),
+                                        'account_holder_name'.tr, true),
                                     buildTextField(accountHolderNameController, onChanged: addMerchantProvider.updateAccountName),
                                     SizedBox(height: 8.0),
                                     buildRequiredLabel(
-                                        'Select mobile banking name*', true),
+                                        'Select_mobile_banking_name'.tr, true),
                                     buildDropdown(
                                       value: addMerchantProvider.bankName,
                                       onChanged: (value) {
@@ -480,7 +468,7 @@ class _AddMerchantState extends State<AddMerchant> {
                                       },
                                     ),
                                     SizedBox(height: 8.0),
-                                    buildRequiredLabel('Account No*', true),
+                                    buildRequiredLabel('account_no'.tr, true),
                                     buildTextField(accountNoController,
                                         keyboardType: TextInputType.number, onChanged: addMerchantProvider.updateAccountNumber),
                                   ],
@@ -492,13 +480,13 @@ class _AddMerchantState extends State<AddMerchant> {
                   ),
                 ),
                 SizedBox(height: 16.0),
-                buildRequiredLabel('Address*', true),
+                buildRequiredLabel('address'.tr, true),
                 buildTextField(userAddressController, onChanged: addMerchantProvider.updateUserAddress, isRequired: true),
                 SizedBox(height: 8.0),
-                buildRequiredLabel('Password*', true),
+                buildRequiredLabel('password'.tr, true),
                 buildTextField(passwordController, onChanged: addMerchantProvider.updateUserPassword, isRequired: true),
                 SizedBox(height: 8.0),
-                buildRequiredLabel('Confirm Password*', true),
+                buildRequiredLabel('confirm_password'.tr, true),
                 buildTextField(confirmPasswordController,onChanged: addMerchantProvider.updateUserCPassword, isRequired: true),
                 SizedBox(height: 16.0),
                 Padding(
@@ -545,7 +533,7 @@ class _AddMerchantState extends State<AddMerchant> {
                             if(addMerchantProvider.paymentMethod==''){
                               Get.snackbar(
                                 "Validation Error!",
-                                "One Payment method is required.",
+                                'validated_payment_method'.tr,
                                 snackPosition: SnackPosition.TOP,
                                 backgroundColor: Colors.red,
                                 colorText: Colors.white,
@@ -557,7 +545,7 @@ class _AddMerchantState extends State<AddMerchant> {
                               if(addMerchantProvider.accountName == ''){
                                 Get.snackbar(
                                   "Validation Error!",
-                                  "Account holder name is required.",
+                                  'validated_account_holder'.tr,
                                   snackPosition: SnackPosition.TOP,
                                   backgroundColor: Colors.red,
                                   colorText: Colors.white,
@@ -567,7 +555,7 @@ class _AddMerchantState extends State<AddMerchant> {
                               }else if(addMerchantProvider.bankName == ''){
                                 Get.snackbar(
                                   "Validation Error!",
-                                  "Bank name is required.",
+                                  'validated_bank_name'.tr,
                                   snackPosition: SnackPosition.TOP,
                                   backgroundColor: Colors.red,
                                   colorText: Colors.white,
@@ -577,7 +565,7 @@ class _AddMerchantState extends State<AddMerchant> {
                               }else if(addMerchantProvider.accountNumber == ''){
                                 Get.snackbar(
                                   "Validation Error!",
-                                  "Account number is required.",
+                                  'validated_ac_number'.tr,
                                   snackPosition: SnackPosition.TOP,
                                   backgroundColor: Colors.red,
                                   colorText: Colors.white,
@@ -593,7 +581,7 @@ class _AddMerchantState extends State<AddMerchant> {
                               {
                                 Get.snackbar(
                                   "Validation Error!",
-                                  "Training name is required.",
+                                  'validated_training_name'.tr,
                                   snackPosition: SnackPosition.TOP,
                                   backgroundColor: Colors.red,
                                   colorText: Colors.white,
@@ -658,7 +646,7 @@ class _AddMerchantState extends State<AddMerchant> {
                                 Colors.white,
                               ),
                             )
-                          : Text('Submit'),
+                          : Text('add_btn'.tr),
                     ),
                   ),
                 ),
@@ -803,7 +791,7 @@ class _AddMerchantState extends State<AddMerchant> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Select Image from',
+                      'image_alert_dialog'.tr,
                       style: const TextStyle(
                           fontSize: 18.0, fontWeight: FontWeight.bold),
                     ),

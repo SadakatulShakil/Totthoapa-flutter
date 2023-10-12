@@ -14,8 +14,9 @@ import 'Providers/dashboard_provider.dart';
 import 'Providers/merchant_provider.dart';
 import 'Providers/profile_provider.dart';
 import 'Providers/user_provider.dart';
-import 'Screens/main_screen.dart';
 import 'Screens/splash_screen.dart';
+import 'Utill/language_constants.dart';
+import 'Utill/languages.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +41,10 @@ void main() async{
     fullName,
     firstTimeLogged,
   );
-
+  String storedLanguageCode =
+      prefs.getString(LanguageConstants.savedLanguageCode) ?? 'bn';
+  String storedLanguageCountryCode =
+      prefs.getString(LanguageConstants.savedLanguageCountryCode) ?? 'BD';
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (_) => UserProvider(user)),
@@ -51,7 +55,12 @@ void main() async{
       ChangeNotifierProvider(create: (_) => UpazilaProvider()),
       ChangeNotifierProvider(create: (_) => CrudMerchantProvider()),
       ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
-    ], child: MyApp()),
+    ],
+        child: MyApp(
+          storedLanguageCode: storedLanguageCode,
+          storedLanguageCountryCode: storedLanguageCountryCode,
+        )
+    ),
   );
 }
 
@@ -65,10 +74,19 @@ Future<void> _requestLocationPermission() async {
 }
 
 class MyApp extends StatelessWidget {
+  String storedLanguageCode;
+  String storedLanguageCountryCode;
+  MyApp(
+  {super.key,
+  required this.storedLanguageCode,
+  required this.storedLanguageCountryCode});
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
+      locale: Locale(storedLanguageCode, storedLanguageCountryCode),
+      translations: Languages(),
+      fallbackLocale: const Locale('bn', 'BD'),
       title: 'Tottho Apa',
       theme: ThemeData(
         primarySwatch: Colors.green,

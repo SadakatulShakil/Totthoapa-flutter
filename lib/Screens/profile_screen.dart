@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Providers/profile_provider.dart';
 import 'package:tottho_apa_flutter/Screens/profile_update_screen.dart';
-
-import '../Providers/connectivity_provider.dart';
-import '../Widgets/connectivity_dialog.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
@@ -12,7 +10,7 @@ class ProfileScreen extends StatelessWidget {
     final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: Text('drawer_two'.tr),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 10.0),
@@ -56,7 +54,7 @@ class ProfileScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Additional Information',
+                  'additional_info'.tr,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black54),
                 ),
                 SizedBox(height: 5),
@@ -67,42 +65,42 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(height: 20),
                 Row(
                   children: [
-                    Expanded(child: Text('ID:')),
+                    Expanded(child: Text('id'.tr)),
                     Expanded(child: Text(profileProvider.userId.toString(), textAlign: TextAlign.right)),
                   ],
                 ),
                 SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: Text('Phone:')),
+                    Expanded(child: Text('phone_label'.tr)),
                     Expanded(child: Text(profileProvider.phoneNo, textAlign: TextAlign.right)),
                   ],
                 ),
                 SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: Text('Email:')),
+                    Expanded(child: Text('email'.tr)),
                     Text(profileProvider.email, textAlign: TextAlign.right,),
                   ],
                 ),
                 SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: Text('District:')),
+                    Expanded(child: Text('district'.tr)),
                     Text(profileProvider.districtName, textAlign: TextAlign.right),
                   ],
                 ),
                 SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: Text('Upazila:')),
+                    Expanded(child: Text('upazila'.tr)),
                     Text(profileProvider.upazilaName, textAlign: TextAlign.right),
                   ],
                 ),
                 SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(child: Text('Zip:')),
+                    Expanded(child: Text('zip'.tr)),
                     Text(profileProvider.zipNo.toString() == 'null'?'N/A':profileProvider.zipNo.toString(), textAlign: TextAlign.right),
                   ],
                 ),
