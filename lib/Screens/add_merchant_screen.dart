@@ -9,6 +9,10 @@ import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Providers/crud_merchant_provider.dart';
 
 import '../Models/add_merchant_model.dart';
+import '../Models/district_model.dart';
+import '../Models/upazila_model.dart';
+import '../Providers/district_provider.dart';
+import '../Providers/upazila_provider.dart';
 import '../Providers/user_provider.dart';
 
 class AddMerchant extends StatefulWidget {
@@ -44,6 +48,8 @@ class _AddMerchantState extends State<AddMerchant> {
   TextEditingController confirmPasswordController = TextEditingController();
 
   Future<void> _checkLocationPermission() async {
+    // final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
+    // await addMerchantProvider.clearAllDataFields();
     var status = await Permission.location.status;
     if (status == PermissionStatus.granted) {
       _getCurrentLocation();
@@ -124,18 +130,47 @@ class _AddMerchantState extends State<AddMerchant> {
     super.initState();
     final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
     _checkLocationPermission();
-    storeNameController.text = addMerchantProvider.shopName;
-    merchantNameController.text = addMerchantProvider.firstName;
-    phoneNo1Controller.text = addMerchantProvider.primaryPhoneNumber;
-    phoneNo2Controller.text = addMerchantProvider.secondPhoneNumber;
-    emailController.text = addMerchantProvider.emailAddress;
-    nidController.text = addMerchantProvider.nidNumber;
-    accountHolderNameController.text = addMerchantProvider.accountName;
-    bankNameController.text = addMerchantProvider.bankName;
-    accountNoController.text = addMerchantProvider.accountNumber;
-    userAddressController.text = addMerchantProvider.userAddress;
-    passwordController.text = addMerchantProvider.userPassword;
-    confirmPasswordController.text = addMerchantProvider.userCPassword;
+    context.read<DistrictProvider>().fetchDistricts();
+    Future.delayed(Duration.zero,()async{
+      addMerchantProvider
+          .setDistrictId(addMerchantProvider.districtId.toString());
+      await context.read<UpazilaProvider>().fetchUpazilas(
+          int.tryParse(addMerchantProvider.districtId.toString()) ?? -1);
+      // Delayed execution to ensure the district dropdown is populated before setting the upazila
+      Future.delayed(Duration(milliseconds: 500), () {
+        // Get the Upazila object from the list using the selectedUpazilaId
+        Upazila selectedUpazila =
+        context.read<UpazilaProvider>().upazilas.firstWhere(
+              (upazila) =>
+          upazila.id.toString() ==
+              (addMerchantProvider.upazilaId.toString()),
+          orElse: () => Upazila(
+              id: -1,
+              district: 56,
+              upazila: 'N/A'), // Default to a placeholder if not found
+        );
+
+        addMerchantProvider.setUpazilaId(selectedUpazila.id.toString());
+        context
+            .read<UpazilaProvider>()
+            .setSelectedUpazilaObject(selectedUpazila);
+      });
+    });
+
+
+    // storeNameController.text = addMerchantProvider.shopName;
+    // merchantNameController.text = addMerchantProvider.firstName;
+    // phoneNo1Controller.text = addMerchantProvider.primaryPhoneNumber;
+    // phoneNo2Controller.text = addMerchantProvider.secondPhoneNumber;
+    // emailController.text = addMerchantProvider.emailAddress;
+    // nidController.text = addMerchantProvider.nidNumber;
+    // accountHolderNameController.text = addMerchantProvider.accountName;
+    // bankNameController.text = addMerchantProvider.bankName;
+    // accountNoController.text = addMerchantProvider.accountNumber;
+    // userAddressController.text = addMerchantProvider.userAddress;
+    // passwordController.text = addMerchantProvider.userPassword;
+    // confirmPasswordController.text = addMerchantProvider.userCPassword;
+
   }
 
   @override
@@ -195,6 +230,107 @@ class _AddMerchantState extends State<AddMerchant> {
                 SizedBox(height: 8.0),
                 buildRequiredLabel('NID', false),
                 buildTextField(nidController, keyboardType: TextInputType.number, onChanged: addMerchantProvider.updateNidNumber),
+                SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0, right: 15),
+                  child: Container(
+                    child: Row(
+                        children: [
+                      Expanded(
+                        child:  buildRequiredLabel('Select district*', true),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: buildRequiredLabel('Select upazila*', true),
+                      ),
+                    ]),
+                  ),
+                ),
+                Card(
+                  elevation: 5, // Set the elevation as needed
+                  child: Container(
+                    padding: const EdgeInsets.only(top: 16.0, bottom: 16, left: 5),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Consumer<DistrictProvider>(
+                            builder: (context, districtProvider, _) {
+                              String selectedDistrict = addMerchantProvider.districtId;
+                              return DropdownButton<String>(
+                                value: selectedDistrict,
+                                onChanged: (value) {
+                                  setState(() {
+                                    Future.delayed(Duration.zero, () async {
+                                      final selectedDistrict = districtProvider.districts.firstWhere((district) =>
+                                      district.id.toString() == value);
+                                      addMerchantProvider.updateDistrictName(
+                                          selectedDistrict.district ?? '');
+                                      addMerchantProvider.setDistrictId(value.toString());
+                                      await context
+                                          .read<UpazilaProvider>()
+                                          .fetchUpazilas(
+                                          int.tryParse(value ?? '1') ?? 1);
+                                      addMerchantProvider.setUpazilaId(context
+                                          .read<UpazilaProvider>()
+                                          .upazilas
+                                          .first
+                                          .id
+                                          .toString());
+                                    });
+                                  });
+                                },
+                                hint: Text('Select district'),
+                                items: [
+                                  ...districtProvider.districts.map((District district) {
+                                    return DropdownMenuItem<String>(
+                                      value: district.id.toString(),
+                                      child: Container(
+                                        width: MediaQuery.of(context).size.width / 2.8,
+                                        child: Text(district.district),
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          child: Consumer<UpazilaProvider>(
+                            builder: (context, upazilaProvider, _) {
+                              return DropdownButton<String>(
+                                value: addMerchantProvider.upazilaId,
+                                onChanged: (value) {
+                                  setState(() {
+                                    final selectedUpazila = upazilaProvider.upazilas.firstWhere((upazila) =>
+                                    upazila.id.toString() == value);
+                                    addMerchantProvider.updateUpazilaName(
+                                        selectedUpazila.upazila);
+                                    addMerchantProvider.setUpazilaId(value.toString());
+                                  });
+                                },
+                                hint: Text('Select Upazila'),
+                                items: [
+                                  ...upazilaProvider.upazilas.map((Upazila upazila) {
+                                    return DropdownMenuItem<String>(
+                                      value: upazila.id.toString(),
+                                      child: Container(
+                                        width: MediaQuery.of(context).size.width / 2.8,
+                                        child: Text(upazila.upazila),
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 SizedBox(height: 16.0),
                 buildRequiredLabel('Are you a member of Joyeta?', false),
                 Row(

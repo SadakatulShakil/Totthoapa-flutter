@@ -22,7 +22,7 @@ class _MerchantDetailsScreenState extends State<MerchantDetailsScreen>{
     super.initState();
     Future.delayed(Duration.zero,(){
       final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
-      print('........: '+ widget.userData.paymentMethod.toString());
+      print('........: '+ widget.userData.trainingOfMs.toString());
       addMerchantProvider.updateUserId(widget.userData.id.toString()??'');
       addMerchantProvider.updateFirstName(widget.userData.name??'');
       addMerchantProvider.updatePrimaryPhoneNumber(widget.userData.phone??'');

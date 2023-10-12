@@ -118,7 +118,6 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
     zipCodeController.text = profileProvider.zipNo.toString() ?? 'N/A';
     Future.delayed(Duration.zero, ()async{
       profileProvider.setDistrictId(profileProvider.districtId.toString());
-      //profileProvider.setUpazilaId(425.toString());
       await context.read<UpazilaProvider>().fetchUpazilas(int.tryParse(profileProvider.districtId.toString())??-1);
       // Delayed execution to ensure the district dropdown is populated before setting the upazila
       Future.delayed(Duration(milliseconds: 500), () {
@@ -211,67 +210,71 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 15.0, right: 15),
-              child: Container(
-                child:
-                Row(
-                    children: [
-                      Expanded(child:
-                      Consumer<DistrictProvider>(
-                        builder: (context, districtProvider, _) {
-                          return DropdownButton<String>(
-                            value: profileProvider.district_Id,
-                            onChanged: (value) {
-                              setState(() {
-                                Future.delayed(Duration.zero, ()async{
-                                  print("test click: "+value.toString());
-                                  profileProvider.setDistrictId(value.toString());// value set
-                                  await context.read<UpazilaProvider>().fetchUpazilas(int.tryParse(value ?? '1')??1);
-                                  profileProvider.setUpazilaId(context.read<UpazilaProvider>().upazilas.first.id.toString());
-                                  //context.read<UpazilaProvider>().upazilas.first.id.toString();
-                                });
-                              });
-                            },
-                            hint: Text('Select District'),
-                            items: [
-                              ...districtProvider.districts.map((District district) {
-                                return DropdownMenuItem<String>(
-                                  value: district.id.toString(),
-                                  child: Text(district.district),
-                                );
-                              }),
-                            ],
-                          );
-                        },
-                      ),
-                      ),
-                      SizedBox(width: 10,),
-                      Expanded(
-                        child: Consumer<UpazilaProvider>(
-                          builder: (context, upazilaProvider, _) {
+              padding: const EdgeInsets.all(8.0),
+              child: Card(
+                elevation: 5,
+                child: Container(
+                  padding: const EdgeInsets.only(top: 16.0, bottom: 16, left: 5),
+                  child:
+                  Row(
+                      children: [
+                        Expanded(child:
+                        Consumer<DistrictProvider>(
+                          builder: (context, districtProvider, _) {
                             return DropdownButton<String>(
-                              value: profileProvider.upazila_Id,
+                              value: profileProvider.district_Id,
                               onChanged: (value) {
                                 setState(() {
-                                  profileProvider.setUpazilaId(value.toString());
+                                  Future.delayed(Duration.zero, ()async{
+                                    print("test click: "+value.toString());
+                                    profileProvider.setDistrictId(value.toString());// value set
+                                    await context.read<UpazilaProvider>().fetchUpazilas(int.tryParse(value ?? '1')??1);
+                                    profileProvider.setUpazilaId(context.read<UpazilaProvider>().upazilas.first.id.toString());
+                                    //context.read<UpazilaProvider>().upazilas.first.id.toString();
+                                  });
                                 });
                               },
-                              hint: Text('Select Upazila'),
+                              hint: Text('Select District'),
                               items: [
-                                ...upazilaProvider.upazilas.map((Upazila upazila) {
+                                ...districtProvider.districts.map((District district) {
                                   return DropdownMenuItem<String>(
-                                    value: upazila.id.toString(),
-                                    child: Text(upazila.upazila),
+                                    value: district.id.toString(),
+                                    child: Text(district.district),
                                   );
                                 }),
                               ],
                             );
                           },
                         ),
-                      ),
+                        ),
+                        SizedBox(width: 10,),
+                        Expanded(
+                          child: Consumer<UpazilaProvider>(
+                            builder: (context, upazilaProvider, _) {
+                              return DropdownButton<String>(
+                                value: profileProvider.upazila_Id,
+                                onChanged: (value) {
+                                  setState(() {
+                                    profileProvider.setUpazilaId(value.toString());
+                                  });
+                                },
+                                hint: Text('Select Upazila'),
+                                items: [
+                                  ...upazilaProvider.upazilas.map((Upazila upazila) {
+                                    return DropdownMenuItem<String>(
+                                      value: upazila.id.toString(),
+                                      child: Text(upazila.upazila),
+                                    );
+                                  }),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
 
 
-                    ]),
+                      ]),
+                ),
               ),
             ),
             SizedBox(width: 10,),

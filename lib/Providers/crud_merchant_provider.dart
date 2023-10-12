@@ -28,8 +28,8 @@ class CrudMerchantProvider extends ChangeNotifier {
   String _shopName = '';
   String _userAddress = '';
   String _profileImage = '';
-  String _districtId = '56';
-  String _upazilaId = '425';
+  String _districtId = '14';
+  String _upazilaId = '118';
   String _paymentMethod = '';
   String _accountName = '';
   String _bankName = '';
@@ -493,7 +493,7 @@ class CrudMerchantProvider extends ChangeNotifier {
     _accountNumber = '';
     _memberOfJoita = '';
     _isTrainedOfFms = '';
-    _trainingOfFmsName = '';
+    _trainingOfFmsName = '0';
 
     notifyListeners();
   }

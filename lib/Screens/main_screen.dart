@@ -124,21 +124,46 @@ class DrawerContent extends StatelessWidget {
     print("name: "+ userProvider.user.full_name.toString());
     return Column(
       children: [
-        Container(
-          height: 180,
-          width: MediaQuery.of(context).size.width,
-          color: Colors.green.withOpacity(.5),
-          padding: EdgeInsets.all(20),
-          child: Center(
-            child: Text(
-              userProvider.user.full_name,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+        Stack(
+          children: [
+            // Image
+            Container(
+              height: 180,
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/laalsobuj_t_apa.png'),
+                  fit: BoxFit.fill,
+                ),
               ),
             ),
-          ),
+            // Green Shadow
+            Container(
+              height: 180,
+              width: MediaQuery.of(context).size.width,
+              color: Colors.green.withOpacity(0.8), // Semi-transparent green color
+            ),
+            // Text
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 20,
+              bottom: 0,
+              child: Container(
+                padding: EdgeInsets.all(20),
+                child: Center(
+                  child: Text(
+                    userProvider.user.full_name,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         GestureDetector(
           onTap: (){
@@ -263,11 +288,14 @@ class Dashboard extends StatelessWidget {
     return Stack(
       children: [
         // Background Image
-        Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/beck_logo.png'), // Replace with your image asset
-              fit: BoxFit.cover,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 30.0, right: 15),
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/beck_logo.png'), // Replace with your image asset
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
