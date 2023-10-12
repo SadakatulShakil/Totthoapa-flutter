@@ -11,6 +11,7 @@ import 'package:tottho_apa_flutter/Screens/new_order_screen.dart';
 import 'package:tottho_apa_flutter/Screens/profile_screen.dart';
 import 'package:tottho_apa_flutter/Screens/total_delivery_screen.dart';
 import 'package:tottho_apa_flutter/Screens/total_order_screen.dart';
+import 'package:upgrader/upgrader.dart';
 
 import '../Api/dashBoard_service.dart';
 import '../Models/add_merchant_model.dart';
@@ -114,16 +115,23 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     print("name_context: "+ userProvider.user.full_name.toString());
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('লাল সবুজ'),
+    return UpgradeAlert(
+      upgrader: Upgrader(
+          canDismissDialog: false,
+          showIgnore: false,
+          showLater: false
       ),
-      drawer: Drawer(
-        child: DrawerContent(userData),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('লাল সবুজ'),
+        ),
+        drawer: Drawer(
+          child: DrawerContent(userData),
+        ),
+        body: RefreshIndicator(
+          onRefresh: _refreshDashboardData,
+            child: Dashboard()),
       ),
-      body: RefreshIndicator(
-        onRefresh: _refreshDashboardData,
-          child: Dashboard()),
     );
   }
 }
@@ -285,10 +293,10 @@ class DrawerContent extends StatelessWidget {
             title: Text('Logout'),
           ),
         ),
-        ListTile(
-          leading: Icon(Icons.update),
-          title: Text('Update'),
-        ),
+        // ListTile(
+        //   leading: Icon(Icons.update),
+        //   title: Text('Update'),
+        // ),
       ],
     );
   }
@@ -326,11 +334,11 @@ class Dashboard extends StatelessWidget {
           padding: EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 50),
           children: [
             DashboardCard(Icons.star, 'New Order', dashboardProvider.totalPending.toString()),
-            DashboardCard(Icons.person, 'Today delivery', dashboardProvider.totalShipped.toString()),
+            DashboardCard(Icons.delivery_dining, 'Today delivery', dashboardProvider.totalShipped.toString()),
             DashboardCard(Icons.shop, 'Total Order', dashboardProvider.totalOrder.toString()),
-            DashboardCard(Icons.shopping_cart, 'Total Order Cost', '৳ '+dashboardProvider.totalOrderPrice.toString()),
-            DashboardCard(Icons.thumb_up, 'Incomplete Order', dashboardProvider.totalProcessing.toString()),
-            DashboardCard(Icons.chat_bubble, 'Total merchant', dashboardProvider.totalMerchant.toString()),
+            DashboardCard(Icons.price_change, 'Total Order Cost', '৳ '+dashboardProvider.totalOrderPrice.toString()),
+            DashboardCard(Icons.cancel, 'Incomplete Order', dashboardProvider.totalProcessing.toString()),
+            DashboardCard(Icons.people, 'Total merchant', dashboardProvider.totalMerchant.toString()),
           ],
         ),
       ],

@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../Api/auth_service.dart';
 import '../Models/user_model.dart';
+import 'package:upgrader/upgrader.dart';
 import '../Providers/connectivity_provider.dart';
 import '../Providers/user_provider.dart';
 import '../Widgets/connectivity_dialog.dart';
@@ -85,122 +85,129 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final connectivityProvider = Provider.of<ConnectivityProvider>(context,listen: false);
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.only(top: 50),
-              child: Image.asset('assets/images/laalsobuj_t_apa.png', width: 150, height: 150,), // Replace with your logo image asset
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              color: Colors.green,
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'Welcome to my app',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+    return UpgradeAlert(
+      upgrader: Upgrader(
+          canDismissDialog: false,
+          showIgnore: false,
+          showLater: false
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.only(top: 50),
+                child: Image.asset('assets/images/laalsobuj_t_apa.png', width: 150, height: 150,), // Replace with your logo image asset
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width,
+                color: Colors.green,
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Welcome to my app',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: phoneController,
-                    decoration: InputDecoration(labelText: 'Phone'),
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(labelText: 'Password'),
-                  ),
-                  SizedBox(height: 20),
-                  Container(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Perform login logic
-                        if (connectivityProvider.status == ConnectivityStatus.Offline) {
-                          // Show the connectivity dialog
-                          showDialog(
-                            context: context,
-                            builder: (context) => ConnectivityDialog(),
-                          );
-                        }else{
-                          _login(context);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.green,
-                      ),
-                      child: isLoading
-                          ? CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      )
-                          : Text('Login'),
+              SizedBox(height: 20),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: phoneController,
+                      decoration: InputDecoration(labelText: 'Phone'),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(labelText: 'Password'),
+                    ),
+                    SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Perform login logic
+                          if (connectivityProvider.status == ConnectivityStatus.Offline) {
+                            // Show the connectivity dialog
+                            showDialog(
+                              context: context,
+                              builder: (context) => ConnectivityDialog(),
+                            );
+                          }else{
+                            _login(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.green,
+                        ),
+                        child: isLoading
+                            ? CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        )
+                            : Text('Login'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    children: [
-                      Text('Task A'),
-                      Container(
+              Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        Text('Task A'),
+                        Container(
 
-                          child: Image.asset('assets/images/totthoapa.png', width: 100, height: 50,)), // Replace with your image asset
-                      Container(
-                          child: Image.asset('assets/images/national.png', width: 100, height: 50,)), // Replace with your image asset
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      SizedBox(height: 10,),
-                      Text('Task B'),
-                      SizedBox(height: 10,),
-                      Image.asset('assets/images/bfti_icon.png', width: 100, height: 50,), // Replace with your image asset
-                      Image.asset('assets/images/com_jagat.png', width: 100, height: 50,), // Replace with your image asset
-                    ],
-                  ),
-                ],
+                            child: Image.asset('assets/images/totthoapa.png', width: 100, height: 50,)), // Replace with your image asset
+                        Container(
+                            child: Image.asset('assets/images/national.png', width: 100, height: 50,)), // Replace with your image asset
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        SizedBox(height: 10,),
+                        Text('Task B'),
+                        SizedBox(height: 10,),
+                        Image.asset('assets/images/bfti_icon.png', width: 100, height: 50,), // Replace with your image asset
+                        Image.asset('assets/images/com_jagat.png', width: 100, height: 50,), // Replace with your image asset
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 10,),
-            Text(
-              'Task C',
-              style: TextStyle(
-                fontSize: 15,
+              SizedBox(height: 10,),
+              Text(
+                'Task C',
+                style: TextStyle(
+                  fontSize: 15,
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 18.0, right: 18, top: 8, bottom: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Image.asset('assets/images/com_jagat.png',width: 100, height: 50,), // Replace with your image asset
-                  Image.asset('assets/images/totthoapa.png', width: 100, height: 50,), // Replace with your image asset
-                ],
+              Padding(
+                padding: const EdgeInsets.only(left: 18.0, right: 18, top: 8, bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Image.asset('assets/images/com_jagat.png',width: 100, height: 50,), // Replace with your image asset
+                    Image.asset('assets/images/totthoapa.png', width: 100, height: 50,), // Replace with your image asset
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
