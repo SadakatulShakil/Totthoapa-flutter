@@ -58,24 +58,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
             borderRadius: 10,
             margin: EdgeInsets.all(10),
           );
+          Navigator.of(context).pop();
         } catch (e, s) {
           print(s);
         }
-        Map<String, dynamic> userData = {
-          'id': profileProvider.userId,
-          'first_name': nameController.text,
-          'username': profileProvider.userName,
-          'email': emailController.text,
-          'phone_no': phoneController.text,
-          'district': int.tryParse(profileProvider.district_Id??'0'),
-          'upazila': int.tryParse(profileProvider.upazila_Id??'0'),
-          'district_name': profileProvider.districtName,
-          'upazila_name': profileProvider.upazilaName,
-          'zip': zipCodeController.text
-        };
 
-        profileProvider.updateProfileData(userData);
-        Navigator.of(context).pop();
       }else if(data['status'].toString() == '401'){
         Get.snackbar(
           "Warning!",

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Api/auth_service.dart';
@@ -19,17 +20,26 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
+  String code = '88';
+  String phoneNumber = '';
 
   Future<void> _login(BuildContext context) async {
+    String processedPhoneNumber ='';
+    if(phoneNumberController.text.startsWith('0')){
+      phoneNumber = phoneNumberController.text.substring(1);
+      processedPhoneNumber = code.substring(1)+phoneNumber;
+    }else{
+      processedPhoneNumber = code.substring(1)+ phoneNumberController.text;
+    }
     setState(() {
       isLoading = true;
     });
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      final response = await AuthService.login(phoneController.text, passwordController.text);
+      final response = await AuthService.login(processedPhoneNumber, passwordController.text);
       print(".........."+response['status'].toString());
       if(response['status'].toString() == 'true'){
         Get.snackbar(
@@ -120,9 +130,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    TextField(
-                      controller: phoneController,
-                      decoration: InputDecoration(labelText: 'phone_label'.tr),
+                    InternationalPhoneNumberInput(
+                      onInputChanged: (PhoneNumber number) {
+                        phoneNumberController.text = number.parseNumber();
+                        code = number.dialCode.toString();
+                      },
+                      selectorConfig: SelectorConfig(
+                        selectorType: PhoneInputSelectorType.DIALOG,
+                      ),
+                      ignoreBlank: false,
+                      autoValidateMode: AutovalidateMode.disabled,
+                      selectorTextStyle: TextStyle(color: Colors.black),
+                      initialValue: PhoneNumber(isoCode: 'BD'),
+                      inputDecoration: InputDecoration(
+                        labelText: 'phone_label'.tr, // Set your custom label here
+                      ),
                     ),
                     SizedBox(height: 10),
                     TextField(
