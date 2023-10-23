@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:tottho_apa_flutter/Providers/crud_merchant_provider.dart';
@@ -43,7 +44,9 @@ class _AddMerchantState extends State<AddMerchant> {
   bool isTakingTraining = false;
   bool isMerchantPaymentEnabled = false;
   var isConnected = false;
-
+  String phoneNumber1 = '';
+  String phoneNumber2 = '';
+  String code = '88';
   String selectedPaymentMethod = '';
   TextEditingController accountHolderNameController = TextEditingController();
   TextEditingController bankNameController = TextEditingController();
@@ -137,7 +140,7 @@ class _AddMerchantState extends State<AddMerchant> {
       final addMerchantProvider = Provider.of<CrudMerchantProvider>(context, listen: false);
       _checkLocationPermission();
       context.read<DistrictProvider>().fetchDistricts();
-      Future.delayed(Duration.zero,(){
+      Future.delayed(Duration(milliseconds: 500),(){
         addMerchantProvider
             .setDistrictId(addMerchantProvider.districtId.toString());
         // Delayed execution to ensure the district dropdown is populated before setting the upazila
@@ -210,12 +213,62 @@ class _AddMerchantState extends State<AddMerchant> {
                 buildTextField(merchantNameController, onChanged: addMerchantProvider.updateFirstName, isRequired: true),
                 SizedBox(height: 8.0),
                 buildRequiredLabel('phone_no_1'.tr, true),
-                buildTextField(phoneNo1Controller,
-                    keyboardType: TextInputType.phone, onChanged: addMerchantProvider.updatePrimaryPhoneNumber, isRequired: true),
+                InternationalPhoneNumberInput(
+                  onInputChanged: (PhoneNumber number) {
+                    phoneNo1Controller.text = number.parseNumber();
+                    code = number.dialCode.toString();
+                    String processedPhoneNumber1 ='';
+                    if(phoneNo1Controller.text.startsWith('0')){
+                      phoneNumber1 = phoneNo1Controller.text.substring(1);
+                      processedPhoneNumber1 = code.substring(1)+phoneNumber1;
+                      addMerchantProvider.updatePrimaryPhoneNumber(processedPhoneNumber1);
+                    }else{
+                      processedPhoneNumber1 = code.substring(1)+ phoneNo1Controller.text;
+                      addMerchantProvider.updatePrimaryPhoneNumber(processedPhoneNumber1);
+                    }
+                  },
+                  selectorConfig: SelectorConfig(
+                    selectorType: PhoneInputSelectorType.DIALOG,
+                  ),
+                  ignoreBlank: false,
+                  autoValidateMode: AutovalidateMode.disabled,
+                  selectorTextStyle: TextStyle(color: Colors.black),
+                  initialValue: PhoneNumber(isoCode: 'BD'),
+                  inputDecoration: InputDecoration(
+                    labelText: 'phone_label'.tr, // Set your custom label here
+                  ),
+                ),
+                // buildTextField(phoneNo1Controller,
+                //     keyboardType: TextInputType.phone, onChanged: addMerchantProvider.updatePrimaryPhoneNumber, isRequired: true),
                 SizedBox(height: 8.0),
                 buildRequiredLabel('phone_no_2'.tr, false),
-                buildTextField(phoneNo2Controller,
-                    keyboardType: TextInputType.phone, onChanged: addMerchantProvider.updateSecondPhoneNumber),
+                InternationalPhoneNumberInput(
+                  onInputChanged: (PhoneNumber number) {
+                    phoneNo2Controller.text = number.parseNumber();
+                    code = number.dialCode.toString();
+                    String processedPhoneNumber2 ='';
+                    if(phoneNo2Controller.text.startsWith('0')){
+                      phoneNumber2 = phoneNo2Controller.text.substring(1);
+                      processedPhoneNumber2 = code.substring(1)+phoneNumber2;
+                      addMerchantProvider.updateSecondPhoneNumber(processedPhoneNumber2);
+                    }else{
+                      processedPhoneNumber2 = code.substring(1)+ phoneNo2Controller.text;
+                      addMerchantProvider.updateSecondPhoneNumber(processedPhoneNumber2);
+                    }
+                  },
+                  selectorConfig: SelectorConfig(
+                    selectorType: PhoneInputSelectorType.DIALOG,
+                  ),
+                  ignoreBlank: true,
+                  autoValidateMode: AutovalidateMode.disabled,
+                  selectorTextStyle: TextStyle(color: Colors.black),
+                  initialValue: PhoneNumber(isoCode: 'BD'),
+                  inputDecoration: InputDecoration(
+                    labelText: 'phone_label'.tr, // Set your custom label here
+                  ),
+                ),
+                // buildTextField(phoneNo2Controller,
+                //     keyboardType: TextInputType.phone, onChanged: addMerchantProvider.updateSecondPhoneNumber),
                 SizedBox(height: 8.0),
                 buildRequiredLabel('email'.tr, false),
                 buildTextField(emailController,
@@ -595,6 +648,16 @@ class _AddMerchantState extends State<AddMerchant> {
                                 );
                               }
                             }
+                          }else if(addMerchantProvider.userPassword != addMerchantProvider.userCPassword){
+                            Get.snackbar(
+                              "Validation Error!",
+                              'password matching filed. please check!',
+                              snackPosition: SnackPosition.TOP,
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                              borderRadius: 10,
+                              margin: EdgeInsets.all(10),
+                            );
                           }
                           if (_formKey.currentState!.validate()) {
                             // The form is valid, perform your actions here
@@ -624,7 +687,10 @@ class _AddMerchantState extends State<AddMerchant> {
                                 addMerchantProvider.isTrainedOfFms+" --->end"
 
                             );
-                            await addMerchantProvider.clearAllDataFields();
+                            Future.delayed(Duration.zero,() async{
+                              await addMerchantProvider.clearAllDataFields();
+                            });
+
                             setState(() {
                               storeNameController.text ='';
                               merchantNameController.text ='';

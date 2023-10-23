@@ -4,10 +4,12 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tottho_apa_flutter/Screens/all_merchant_screen.dart';
 import 'dart:convert';
 
 import '../Models/district_model.dart';
 import '../Screens/login_screen.dart';
+import '../Screens/main_screen.dart';
 
 class CrudMerchantProvider extends ChangeNotifier {
   //field initialized
@@ -292,6 +294,10 @@ class CrudMerchantProvider extends ChangeNotifier {
           colorText: Colors.white,
           borderRadius: 10,
           margin: EdgeInsets.all(10),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AllMerchantScreen()),
         );
         notifyListeners();
         return true;
