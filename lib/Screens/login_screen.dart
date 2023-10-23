@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -25,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   String code = '88';
   String phoneNumber = '';
+  var isConnected = false;
 
   Future<void> _login(BuildContext context) async {
     String processedPhoneNumber ='';
@@ -156,9 +158,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async{
                           // Perform login logic
-                          if (connectivityProvider.status == ConnectivityStatus.Offline) {
+                          var result = await Connectivity().checkConnectivity();
+                          setState(() {
+                          isConnected = (result != ConnectivityResult.none);
+                          });
+                          if (!isConnected) {
                             // Show the connectivity dialog
                             showDialog(
                               context: context,

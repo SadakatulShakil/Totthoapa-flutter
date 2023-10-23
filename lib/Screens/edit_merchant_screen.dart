@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -42,6 +43,7 @@ class _EditMerchantScreenState extends State<EditMerchantScreen> {
   bool isLoading = false;
   bool isMemberOfJoyeta = false;
   bool isTakingTraining = false;
+  var isConnected = false;
 
   String selectedPaymentMethod = '';
   TextEditingController accountHolderNameController = TextEditingController();
@@ -552,8 +554,11 @@ class _EditMerchantScreenState extends State<EditMerchantScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
-                        if (connectivityProvider.status == ConnectivityStatus.Offline) {
-                          // Show the connectivity dialog
+                        var result = await Connectivity().checkConnectivity();
+                        setState(() {
+                          isConnected = (result != ConnectivityResult.none);
+                        });
+                        if(!isConnected){
                           showDialog(
                             context: context,
                             builder: (context) => ConnectivityDialog(),

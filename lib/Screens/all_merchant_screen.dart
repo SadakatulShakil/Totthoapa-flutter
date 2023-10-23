@@ -13,7 +13,6 @@ class AllMerchantScreen extends StatefulWidget {
 }
 
 class _AllMerchantScreenState extends State<AllMerchantScreen> {
-  late Future<void> _initFuture;
   @override
   void initState() {
     super.initState();

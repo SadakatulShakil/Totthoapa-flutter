@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tottho_apa_flutter/Providers/user_provider.dart';
+
+import '../Api/auth_service.dart';
+import '../Screens/login_screen.dart';
 
 class ProfileProvider with ChangeNotifier {
   int userId = 0;
@@ -29,15 +37,59 @@ class ProfileProvider with ChangeNotifier {
 
   String? _districtId;
   String? _upazilaId;
-  String? get district_Id => _districtId;
-  String? get upazila_Id => _upazilaId;
-  void setDistrictId (String? setValue){
-    _districtId = setValue;
+  String? get district_Id => districtId.toString();
+  String? get upazila_Id => upazilaId.toString();
+
+  void setDistrictId (String setValue){
+    districtId = int.tryParse(setValue)??0;
     notifyListeners();
   }
 
-  void setUpazilaId (String? setValue){
-    _upazilaId = setValue;
+  void setUpazilaId (String setValue){
+    upazilaId = int.tryParse(setValue)??0;
     notifyListeners();
   }
+
+  String get first_name => firstName;
+  void updateFirstName(String value){
+    firstName = value;
+    notifyListeners();
+  }
+
+  String get user_name => userName;
+  void updateUserName(String value){
+    userName = value;
+    notifyListeners();
+  }
+
+  String get emailAddress => email;
+  void updateEmailAddress(String value){
+    email = value;
+    notifyListeners();
+  }
+
+  String get phone_no => phoneNo;
+  void updatePhoneNo(String value){
+    phoneNo = value;
+    notifyListeners();
+  }
+
+  String get district_name => districtName;
+  void updateDistrictName(String value){
+    districtName = value;
+    notifyListeners();
+  }
+
+  String get upazila_name => upazilaName;
+  void updateUpazilaName(String value){
+    upazilaName = value;
+    notifyListeners();
+  }
+
+  String get zip_code => zipNo;
+  void updateZipCode(String value){
+    zipNo = value;
+    notifyListeners();
+  }
+
 }

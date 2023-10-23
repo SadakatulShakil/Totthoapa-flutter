@@ -1,9 +1,10 @@
 import 'dart:math'; // Import the math package for random number generation
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tottho_apa_flutter/Api/auth_service.dart';
 import 'package:tottho_apa_flutter/Screens/add_merchant_screen.dart';
 import 'package:tottho_apa_flutter/Screens/incomplete_order_screen.dart';
 import 'package:tottho_apa_flutter/Screens/login_screen.dart';
@@ -15,9 +16,7 @@ import 'package:upgrader/upgrader.dart';
 
 import '../Api/dashBoard_service.dart';
 import '../Models/add_merchant_model.dart';
-import '../Providers/connectivity_provider.dart';
 import '../Providers/dashboard_provider.dart';
-import '../Providers/profile_provider.dart';
 import '../Providers/user_provider.dart';
 import '../Widgets/connectivity_dialog.dart';
 import 'all_merchant_screen.dart';
@@ -29,6 +28,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late Future<void> _initFuture;
+  var isConnected = false;
   merchantDataModel userData = merchantDataModel.nullConstructor();
   Future<void> _fetchDashboardData(BuildContext context) async {
     try {
@@ -59,54 +59,30 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  Future<void> _fetchProfileData(BuildContext context) async {
-    try {
-      final userToken = Provider.of<UserProvider>(context, listen: false).user.token;
-      print("token_context: "+ userToken.toString());
-      final data = await AuthService.profileData(userToken);
-      Provider.of<ProfileProvider>(context, listen: false).updateProfileData(data);
-    } catch (e) {
-      // Handle data fetch failure
-      print('Failed to fetch profile data: $e');
-      Get.snackbar(
-        "Warning!",
-        "Authentication failed. Your session has expired",
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        borderRadius: 10,
-        margin: EdgeInsets.all(10),
-      );
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('token', '');
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-      // Display an error message to the user
-    }
-  }
-
   Future<void> _refreshDashboardData() async {
-    final connectivityProvider = Provider.of<ConnectivityProvider>(context,listen: false);
-    if (connectivityProvider.status == ConnectivityStatus.Offline) {
-      // Show the connectivity dialog
+    var result = await Connectivity().checkConnectivity();
+    setState(() {
+      isConnected = (result != ConnectivityResult.none);
+    });
+    if(!isConnected){
       showDialog(
         context: context,
         builder: (context) => ConnectivityDialog(),
       );
     }else{
-      await _fetchDashboardData(context);
-      await _fetchProfileData(context);
+      _fetchDashboardData(context); // Fetch dashboard data on screen load
     }
+  }
+
+  Future<void> checkConnectivity() async {
+
   }
 
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration.zero,(){
-      _fetchDashboardData(context); // Fetch dashboard data on screen load
-      _fetchProfileData(context);
+      _fetchDashboardData(context);
     });
 
   }
