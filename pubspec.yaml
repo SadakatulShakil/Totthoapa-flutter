@@ -58,6 +58,30 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: "^0.13.1"
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"  # Replace with the path to your icon image
+  adaptive_icon_background: "#FFFFFF"  # Background color for Android Adaptive Icon
+  adaptive_icon_foreground: "assets/icon/icon.png"  # Icon foreground for Android Adaptive Icon
+  image_path_ios: "assets/icon/icon.png"  # iOS icon (if different)
+  android_icons:
+    - name: "ic_launcher"
+      adaptive_icon_background: "#FFFFFF"  # Background color for Android Launcher Icon
+      adaptive_icon_foreground: "assets/icon/icon.png"  # Icon foreground for Android Launcher Icon
+      playstore: true  # Generate an icon for the Play Store listing
+  ios_icons:
+    - name: "AppIcon"  # iOS AppIcon is a required name
+      sizes:
+        - 120x120
+        - 180x180
+        - 1024x1024
+      unselected_sizes:
+        - 30x30
+      ios_image: "assets/icon/icon.png"
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
